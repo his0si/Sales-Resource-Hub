@@ -1,0 +1,16 @@
+# Python / FastAPI
+server/.venv/
+__pycache__/
+*.pyc
+.env
+
+# Node / Vite
+client/node_modules/
+client/dist/
+client/.vite/
+
+# OS / editor
+.DS_Store
+
+# Claude Code
+.claude/

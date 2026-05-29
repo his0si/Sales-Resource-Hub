@@ -1,0 +1,27 @@
+# 이 앱은 호스트 nginx 뒤에서 동작한다.
+#   호스트 nginx(80/443, SSL) --proxy--> 127.0.0.1:8100 (web 컨테이너)
+#   web 컨테이너 nginx --proxy /api--> api 컨테이너(:8000, 내부 전용)
+# 기존 배포(portfolio:8080, comfit:8090)와 포트가 겹치지 않도록 8100 사용.
+services:
+  api:
+    build:
+      context: ./server
+    image: hansolax-api
+    restart: unless-stopped
+    expose:
+      - "8000"          # 컴포즈 내부 네트워크에서만 접근 (호스트 노출 안 함)
+    env_file:
+      - path: ./server/.env
+        required: false  # 백엔드 환경변수가 필요하면 server/.env 생성
+
+  web:
+    build:
+      context: ./client
+      args:
+        VITE_API_URL: ""   # 같은 도메인의 /api 사용 (CORS 불필요)
+    image: hansolax-web
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "127.0.0.1:8100:80"   # 호스트 nginx만 접근하도록 localhost 바인딩
