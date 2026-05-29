@@ -14,10 +14,7 @@
 
 | 도메인 | 프록시 대상 |
 |--------|-------------|
-| heeseokim.o-r.kr | 127.0.0.1:8080 (portfolio) |
-| comfit.kro.kr | 127.0.0.1:8090 (comfit) |
-| ewhasecret.com | localhost:3000 |
-| **hansolax.kro.kr** | **127.0.0.1:8100 (이 앱)** |
+| hansolax.kro.kr | 127.0.0.1:8100 |
 
 그래서 이 앱은 80/443을 직접 잡지 않고, 같은 패턴을 따릅니다:
 
@@ -96,21 +93,6 @@ npm run dev
 
 ---
 
-## 자주 쓰는 명령어
-
-```bash
-# 상태 / 로그
-sudo docker compose -f docker-compose.prod.yml ps
-sudo docker compose -f docker-compose.prod.yml logs -f web
-sudo docker compose -f docker-compose.prod.yml logs -f api
-
-# 중지 / 재시작
-sudo docker compose -f docker-compose.prod.yml down
-sudo docker compose -f docker-compose.prod.yml restart
-
-# 호스트 nginx (다른 서비스와 공용이므로 reload 권장)
-sudo nginx -t && sudo systemctl reload nginx
-```
 
 SSL 인증서는 acme.sh가 설치한 일일 cron(hansolax 유저 crontab)이 자동 갱신하고, 갱신되면 nginx가 자동 reload됩니다. 수동 강제 갱신: `~/.acme.sh/acme.sh --renew -d hansolax.kro.kr --force --ecc`
 
