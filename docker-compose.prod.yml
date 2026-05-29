@@ -8,6 +8,8 @@ services:
       context: ./server
     image: hansolax-api
     restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"   # 컨테이너 → 호스트(네이티브 PostgreSQL 5433) 접근용
     expose:
       - "8000"          # 컴포즈 내부 네트워크에서만 접근 (호스트 노출 안 함)
     env_file:
