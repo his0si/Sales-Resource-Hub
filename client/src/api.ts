@@ -1,8 +1,57 @@
-// 백엔드(FastAPI) 베이스 URL. 필요하면 .env 의 VITE_API_URL 로 덮어쓸 수 있습니다.
+// 백엔드(FastAPI) 베이스 URL. 운영에서는 같은 도메인의 /api 를 쓰므로 빈 문자열,
+// 로컬 개발에서는 http://localhost:8000 으로 폴백.
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
-export async function getHealth(): Promise<{ status: string }> {
-  const res = await fetch(`${API_URL}/api/health`);
-  if (!res.ok) throw new Error(`API error: ${res.status}`);
-  return res.json();
+async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const res = await fetch(`${API_URL}${path}`, {
+    headers: { "Content-Type": "application/json", ...(options?.headers ?? {}) },
+    ...options,
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const detail = (data as { detail?: string }).detail;
+    throw new Error(detail ?? `요청 실패 (${res.status})`);
+  }
+  return data as T;
+}
+
+export function getHealth(): Promise<{ status: string }> {
+  return request("/api/health");
+}
+
+export function getAuthConfig(): Promise<{ allowed_domains: string[] }> {
+  return request("/api/auth/config");
+}
+
+export function register(email: string, password: string): Promise<{ message: string }> {
+  return request("/api/auth/register", {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
+  });
+}
+
+export interface LoginResult {
+  access_token: string;
+  token_type: string;
+  email: string;
+}
+
+export function login(email: string, password: string): Promise<LoginResult> {
+  return request("/api/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
+  });
+}
+
+export interface Me {
+  id: number;
+  email: string;
+  is_verified: boolean;
+  created_at: string;
+}
+
+export function getMe(token: string): Promise<Me> {
+  return request("/api/auth/me", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
 }

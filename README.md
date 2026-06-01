@@ -115,6 +115,32 @@ curl http://127.0.0.1:8100/api/users       # → users 목록
 
 ---
 
+## 로그인 인증
+
+이메일 도메인 제한 + Gmail SMTP 이메일 인증 + JWT 기반 로그인.
+
+**흐름**
+
+1. **회원가입** `POST /api/auth/register` — 허용 도메인(`@hansol.com`)만 통과. 미인증 유저 생성 후 인증 메일 발송.
+2. **이메일 인증** `GET /api/auth/verify?token=...` — 메일 속 링크. JWT(`type=verify`) 검증 → `is_verified=TRUE` → 프론트 `/login?verified=success` 로 리다이렉트.
+3. **로그인** `POST /api/auth/login` — 자격 + 인증여부 확인 후 access JWT 발급.
+4. **본인 조회** `GET /api/auth/me` — `Authorization: Bearer <token>`.
+5. **허용 도메인 조회** `GET /api/auth/config` — 프론트가 안내 문구/검증에 사용(도메인 단일 출처).
+
+| 파일 | 역할 |
+|------|------|
+| `server/app/config.py` | 허용 도메인 / JWT / SMTP 설정 |
+| `server/app/security.py` | bcrypt 해싱 + JWT 발급/검증 |
+| `server/app/email_utils.py` | Gmail SMTP 인증 메일 발송 |
+| `server/app/routers/auth.py` | 위 엔드포인트 |
+| `client/src/pages/{Register,Login,Home}.tsx` | 가입/로그인/홈 화면 |
+
+
+- **Gmail 앱 비밀번호**: Google 계정 → 보안 → 2단계 인증 ON → "앱 비밀번호" 생성.
+- SMTP 미설정 시 메일을 보내지 않고 인증 링크를 **api 컨테이너 로그**에 출력합니다(개발용).
+
+---
+
 ## 운영 배포 (hansolax.kro.kr)
 
 ### 사전 준비
