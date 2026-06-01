@@ -1,0 +1,263 @@
+.mail-page {
+  max-width: 860px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+  box-sizing: border-box;
+}
+
+.mail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.mail-title {
+  min-width: 0;
+}
+
+.mail-header h1 {
+  font-size: 24px;
+  margin: 0 0 2px;
+  color: var(--text-h);
+}
+
+.mail-sub {
+  font-size: 14px;
+  margin: 0;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* === 햄버거 메뉴 === */
+.mail-menu {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.mail-hamburger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--text-h);
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.mail-hamburger:hover {
+  background: var(--accent-bg);
+  border-color: var(--accent-border);
+}
+
+.mail-hamburger:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.mail-menu-panel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 50;
+  min-width: 220px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+  box-shadow: var(--shadow);
+  text-align: left;
+}
+
+.mail-menu-account {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px 10px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 6px;
+}
+
+.mail-menu-label {
+  font-size: 11px;
+  color: var(--text);
+}
+
+.mail-menu-email {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-h);
+  word-break: break-all;
+}
+
+.mail-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  font: inherit;
+  font-size: 14px;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-h);
+  cursor: pointer;
+  text-align: left;
+}
+
+.mail-menu-item:hover {
+  background: var(--accent-bg);
+}
+
+.mail-menu-item.danger {
+  color: #dc2626;
+}
+
+.mail-menu-item.danger:hover {
+  background: rgba(220, 38, 38, 0.1);
+}
+
+.mail-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.mail-item + .mail-item {
+  border-top: 1px solid var(--border);
+}
+
+.mail-row {
+  display: grid;
+  grid-template-columns: 180px 1fr auto;
+  grid-template-areas:
+    'from subject date'
+    'from snippet snippet';
+  gap: 2px 14px;
+  align-items: center;
+  position: relative;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  padding: 14px 18px;
+  border: none;
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.mail-row:hover {
+  background: var(--accent-bg);
+}
+
+.mail-from {
+  grid-area: from;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-h);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mail-subject {
+  grid-area: subject;
+  font-size: 15px;
+  color: var(--text-h);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mail-snippet {
+  grid-area: snippet;
+  font-size: 13px;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mail-date {
+  grid-area: date;
+  font-size: 12px;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+/* 안 읽은 메일 강조 */
+.mail-item.unread .mail-from,
+.mail-item.unread .mail-subject {
+  font-weight: 700;
+}
+
+.mail-item.unread .mail-row::before {
+  content: '';
+  position: absolute;
+  margin-left: -10px;
+  margin-top: 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.mail-item.open .mail-row {
+  background: var(--accent-bg);
+}
+
+.mail-body {
+  padding: 16px 18px;
+  border-top: 1px dashed var(--border);
+  background: var(--code-bg);
+  color: var(--text-h);
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.mail-empty {
+  padding: 32px;
+  text-align: center;
+  color: var(--text);
+}
+
+@media (max-width: 600px) {
+  .mail-page {
+    padding: 20px 14px 48px;
+  }
+
+  .mail-header h1 {
+    font-size: 20px;
+  }
+
+  .mail-row {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      'from'
+      'subject'
+      'snippet'
+      'date';
+    padding: 12px 14px;
+  }
+
+  .mail-date {
+    margin-top: 2px;
+  }
+}

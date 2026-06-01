@@ -55,3 +55,45 @@ export function getMe(token: string): Promise<Me> {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
+
+// === Gmail (ai.hansolhomedeco@gmail.com 공용 메일함, 로그인한 사용자 누구나 열람) ===
+
+export interface MailItem {
+  id: string;
+  threadId: string;
+  from: string;
+  subject: string;
+  date: string;
+  snippet: string;
+  unread: boolean;
+}
+
+export interface InboxResult {
+  mailbox: string;
+  count: number;
+  messages: MailItem[];
+}
+
+export function getInbox(token: string, maxResults = 15): Promise<InboxResult> {
+  return request(`/api/gmail/inbox?max_results=${maxResults}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+// Gmail users.messages.get(format=full) 원본 구조 (필요한 필드만 느슨하게 정의)
+export interface GmailPart {
+  mimeType?: string;
+  body?: { data?: string };
+  parts?: GmailPart[];
+}
+export interface GmailMessage {
+  id: string;
+  snippet?: string;
+  payload?: GmailPart;
+}
+
+export function getMessage(token: string, id: string): Promise<GmailMessage> {
+  return request(`/api/gmail/messages/${id}?fmt=full`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}

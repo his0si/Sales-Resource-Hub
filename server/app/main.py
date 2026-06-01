@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app import db
-from app.routers import auth, database, health
+from app.routers import auth, database, gmail, health
 
 
 @asynccontextmanager
@@ -32,6 +32,7 @@ app.add_middleware(
 app.include_router(health.router)
 app.include_router(database.router)
 app.include_router(auth.router)
+app.include_router(gmail.router)
 
 
 @app.get("/")

@@ -58,6 +58,18 @@
   outline-offset: 1px;
 }
 
+/* Chrome 자동완성 시 입히는 회색/노란 배경 제거 — 테마 배경색으로 강제 */
+.auth-form input:-webkit-autofill,
+.auth-form input:-webkit-autofill:hover,
+.auth-form input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text-h);
+  -webkit-box-shadow: 0 0 0 1000px var(--bg) inset;
+  box-shadow: 0 0 0 1000px var(--bg) inset;
+  caret-color: var(--text-h);
+  /* 자동완성 배경 전환을 사실상 멈춰 회색이 잠깐도 안 보이게 */
+  transition: background-color 9999s ease-out 0s;
+}
+
 .auth-btn {
   font: inherit;
   font-size: 15px;
