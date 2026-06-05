@@ -1,54 +1,106 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {
-  getInbox,
-  getMe,
-  getMessage,
-  type GmailPart,
-  type InboxResult,
-  type MailItem,
-  type Me,
-} from '../api'
+import { getMe, getSalesMemos, type Me, type SalesMemo, type SalesMemoResult } from '../api'
 import { CloseIcon, LogoutIcon, MenuIcon, MoonIcon, SunIcon } from '../components/icons'
 import { useTheme } from '../useTheme'
 import '../auth.css'
 import '../mail.css'
 
-// Gmail 본문은 base64url 로 인코딩되어 있어 디코딩이 필요하다.
-function decodeB64Url(data: string): string {
-  const b64 = data.replace(/-/g, '+').replace(/_/g, '/')
-  const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0))
-  return new TextDecoder('utf-8').decode(bytes)
+// "2026-06-04" / "2026-06-04T00:00:00" → "2026-06-04"
+function fmtDate(v: string | null): string {
+  return v ? v.slice(0, 10) : ''
 }
 
-// payload 트리를 훑어 본문을 추출. text/plain 우선, 없으면 text/html 을 텍스트로 변환.
-function extractBody(payload?: GmailPart): string {
-  if (!payload) return ''
-  const plain = findPart(payload, 'text/plain')
-  if (plain?.body?.data) return decodeB64Url(plain.body.data)
-  const html = findPart(payload, 'text/html')
-  if (html?.body?.data) {
-    const doc = new DOMParser().parseFromString(decodeB64Url(html.body.data), 'text/html')
-    return doc.body.textContent?.trim() ?? ''
+// "2026-06-05T09:14:54" → "2026-06-05 09:14:54"
+function fmtDateTime(v: string | null): string {
+  if (!v) return ''
+  const [d, t] = v.split('T')
+  return t ? `${d} ${t.slice(0, 8)}` : d
+}
+
+// 목록 미리보기: 채워진 항목의 첫 줄
+function previewLine(memo: SalesMemo): string {
+  for (const v of [memo.activity_plan, memo.strategy, memo.takeaway, memo.product]) {
+    if (v && v.trim()) return v.trim().split('\n')[0]
   }
-  if (payload.body?.data) return decodeB64Url(payload.body.data)
   return ''
 }
 
-function findPart(part: GmailPart, mime: string): GmailPart | null {
-  if (part.mimeType === mime && part.body?.data) return part
-  for (const p of part.parts ?? []) {
-    const found = findPart(p, mime)
-    if (found) return found
-  }
-  return null
+// DB 컬럼으로 원본 HSP Sales Memo 표를 재구성해 보여준다.
+function MemoTable({ memo }: { memo: SalesMemo }) {
+  return (
+    <table className="memo-table">
+      <tbody>
+        <tr>
+          <td className="memo-label">거래선</td>
+          <td className="memo-value" colSpan={3}>
+            {memo.customer_name}
+          </td>
+        </tr>
+        <tr>
+          <td className="memo-label">방문예정일</td>
+          <td className="memo-value">{fmtDate(memo.planned_visit_date)}</td>
+          <td className="memo-label">방문일</td>
+          <td className="memo-value">{fmtDate(memo.visit_date)}</td>
+        </tr>
+        <tr>
+          <td className="memo-label">작성자</td>
+          <td className="memo-value">{memo.author_name}</td>
+          <td className="memo-label">작성일</td>
+          <td className="memo-value">{fmtDateTime(memo.written_at)}</td>
+        </tr>
+        <tr>
+          <td className="memo-label">활동계획</td>
+          <td className="memo-value" colSpan={3}>
+            {memo.activity_plan}
+          </td>
+        </tr>
+        <tr>
+          <td className="memo-label">전략</td>
+          <td className="memo-value" colSpan={3}>
+            {memo.strategy}
+          </td>
+        </tr>
+        <tr>
+          <td className="memo-label">운영</td>
+          <td className="memo-value" colSpan={3}>
+            {memo.operation}
+          </td>
+        </tr>
+        <tr>
+          <td className="memo-label">제품</td>
+          <td className="memo-value" colSpan={3}>
+            {memo.product}
+          </td>
+        </tr>
+        <tr>
+          <td className="memo-label">개인</td>
+          <td className="memo-value" colSpan={3}>
+            {memo.personal}
+          </td>
+        </tr>
+        <tr>
+          <td className="memo-label">영업사원 시사점</td>
+          <td className="memo-value" colSpan={3}>
+            {memo.takeaway}
+          </td>
+        </tr>
+        <tr>
+          <td className="memo-label">팀장 피드백</td>
+          <td className="memo-value" colSpan={3}>
+            {memo.followup_plan}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  )
 }
 
 export default function Home() {
   const navigate = useNavigate()
   const [theme, toggleTheme] = useTheme()
   const [me, setMe] = useState<Me | null>(null)
-  const [inbox, setInbox] = useState<InboxResult | null>(null)
+  const [result, setResult] = useState<SalesMemoResult | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -56,10 +108,8 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
-  // 펼친 메일의 id 와 본문 캐시
-  const [openId, setOpenId] = useState<string | null>(null)
-  const [bodies, setBodies] = useState<Record<string, string>>({})
-  const [bodyLoading, setBodyLoading] = useState(false)
+  // 펼친 메모의 id
+  const [openId, setOpenId] = useState<number | null>(null)
 
   // 메뉴 바깥 클릭 / ESC 로 닫기
   useEffect(() => {
@@ -84,44 +134,28 @@ export default function Home() {
       navigate('/login')
       return
     }
-    Promise.all([getMe(token), getInbox(token)])
-      .then(([meRes, inboxRes]) => {
+    // 인증(getMe)과 영업일지(getSalesMemos)를 분리한다.
+    //  - getMe 실패 = 토큰 만료/무효 → 로그아웃 후 로그인으로.
+    //  - getSalesMemos 실패 = DB 쪽 문제 → 로그인은 유지하고 메시지만 표시.
+    getMe(token)
+      .then((meRes) => {
         setMe(meRes)
-        setInbox(inboxRes)
+        return getSalesMemos(token)
+          .then(setResult)
+          .catch((err) => {
+            setError(err instanceof Error ? err.message : '영업일지를 불러오지 못했습니다.')
+          })
       })
-      .catch((err) => {
-        // me 조회 실패(토큰 만료/무효)면 로그아웃, 그 외(메일함 오류)는 메시지 표시
-        const msg = err instanceof Error ? err.message : '불러오기에 실패했습니다.'
-        if (msg.includes('토큰') || msg.includes('인증') || msg.includes('401')) {
-          localStorage.removeItem('access_token')
-          localStorage.removeItem('email')
-          navigate('/login')
-          return
-        }
-        setError(msg)
+      .catch(() => {
+        localStorage.removeItem('access_token')
+        localStorage.removeItem('email')
+        navigate('/login')
       })
       .finally(() => setLoading(false))
   }, [navigate])
 
-  async function toggle(mail: MailItem) {
-    if (openId === mail.id) {
-      setOpenId(null)
-      return
-    }
-    setOpenId(mail.id)
-    if (bodies[mail.id] !== undefined) return
-    const token = localStorage.getItem('access_token')
-    if (!token) return
-    setBodyLoading(true)
-    try {
-      const full = await getMessage(token, mail.id)
-      const body = extractBody(full.payload) || mail.snippet
-      setBodies((prev) => ({ ...prev, [mail.id]: body }))
-    } catch {
-      setBodies((prev) => ({ ...prev, [mail.id]: '본문을 불러오지 못했습니다.' }))
-    } finally {
-      setBodyLoading(false)
-    }
+  function toggle(id: number) {
+    setOpenId((cur) => (cur === id ? null : id))
   }
 
   function logout() {
@@ -130,12 +164,16 @@ export default function Home() {
     navigate('/login')
   }
 
+  const memos = result?.memos ?? []
+
   return (
     <div className="mail-page">
       <header className="mail-header">
         <div className="mail-title">
-          <h1>받은 메일함</h1>
-          <p className="mail-sub">{inbox?.mailbox ?? 'ai.hansolhomedeco@gmail.com'}</p>
+          <h1>영업일지</h1>
+          <p className="mail-sub">
+            {result ? `전체 ${result.total}건 · 최신순` : 'ai.hansolhomedeco@gmail.com'}
+          </p>
         </div>
 
         <div className="mail-menu" ref={menuRef}>
@@ -183,25 +221,25 @@ export default function Home() {
       {loading && <p className="mail-empty">불러오는 중…</p>}
       {error && <div className="auth-msg error">{error}</div>}
 
-      {!loading && !error && inbox && (
+      {!loading && !error && result && (
         <ul className="mail-list">
-          {inbox.messages.length === 0 && <li className="mail-empty">메일이 없습니다.</li>}
-          {inbox.messages.map((mail) => (
+          {memos.length === 0 && <li className="mail-empty">영업일지가 없습니다.</li>}
+          {memos.map((memo) => (
             <li
-              key={mail.id}
-              className={`mail-item${mail.unread ? ' unread' : ''}${openId === mail.id ? ' open' : ''}`}
+              key={memo.id}
+              className={`mail-item${openId === memo.id ? ' open' : ''}`}
             >
-              <button className="mail-row" type="button" onClick={() => toggle(mail)}>
-                <span className="mail-from">{mail.from}</span>
-                <span className="mail-subject">{mail.subject || '(제목 없음)'}</span>
-                <span className="mail-snippet">{mail.snippet}</span>
-                <span className="mail-date">{new Date(mail.date).toLocaleString('ko-KR')}</span>
+              <button className="mail-row" type="button" onClick={() => toggle(memo.id)}>
+                <span className="mail-from">{memo.author_name || '작성자 미상'}</span>
+                <span className="mail-subject">{memo.customer_name || '(거래선 없음)'}</span>
+                <span className="mail-snippet">{previewLine(memo)}</span>
+                <span className="mail-date">
+                  {fmtDateTime(memo.written_at) || fmtDate(memo.visit_date)}
+                </span>
               </button>
-              {openId === mail.id && (
+              {openId === memo.id && (
                 <div className="mail-body">
-                  {bodies[mail.id] === undefined && bodyLoading
-                    ? '본문 불러오는 중…'
-                    : bodies[mail.id]}
+                  <MemoTable memo={memo} />
                 </div>
               )}
             </li>

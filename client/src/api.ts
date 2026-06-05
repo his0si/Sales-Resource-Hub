@@ -97,3 +97,38 @@ export function getMessage(token: string, id: string): Promise<GmailMessage> {
     headers: { Authorization: `Bearer ${token}` },
   });
 }
+
+// === 영업일지(sales_memo) — DB 에 적재된 메모를 최신순으로 조회 ===
+// 들어온 [HSP SalesMemo] 메일은 서버 폴러가 DB 에 저장하므로 화면은 DB 만 본다.
+
+export interface SalesMemo {
+  id: number;
+  visit_no: string;
+  customer_name: string | null;
+  customer_code: string | null;
+  author_name: string | null;
+  author_emp_no: string | null;
+  planned_visit_date: string | null;
+  visit_date: string | null;
+  written_at: string | null;
+  activity_plan: string | null;
+  strategy: string | null;
+  operation: string | null;
+  product: string | null;
+  personal: string | null;
+  takeaway: string | null;
+  followup_plan: string | null;
+  gmail_id: string | null;
+}
+
+export interface SalesMemoResult {
+  count: number;
+  total: number;
+  memos: SalesMemo[];
+}
+
+export function getSalesMemos(token: string, limit = 500): Promise<SalesMemoResult> {
+  return request(`/api/sales-memo?limit=${limit}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}

@@ -232,6 +232,32 @@
   overflow-y: auto;
 }
 
+/* === 영업일지 표(HSP Sales Memo) 렌더링 — DB 컬럼으로 재구성 === */
+.memo-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 14px;
+}
+
+.memo-table td {
+  border: 1px solid var(--border);
+  padding: 9px 12px;
+  vertical-align: top;
+  text-align: left;
+  word-break: break-word;
+  white-space: pre-wrap;        /* DB 본문의 줄바꿈(\n) 보존 */
+}
+
+/* 라벨 셀(거래선/방문일/작성자 …)은 회색 배경 + 가운데 정렬, 내용 폭에 맞춤 */
+.memo-table td.memo-label {
+  background: var(--accent-bg);
+  color: var(--text);
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+  width: 1%;
+}
+
 .mail-empty {
   padding: 32px;
   text-align: center;
