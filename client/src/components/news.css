@@ -1,0 +1,76 @@
+/* ===== 뉴스 (단일 리스트 화면) =====
+   필터바/AI 배너는 trends.css, 칩은 app.css(dash-chip)를 재사용하고
+   뉴스 카드만 여기서 정의한다. */
+
+.news-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.news-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 21px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 14px;
+}
+
+.news-card:hover {
+  border-color: rgba(0, 0, 0, 0.18);
+}
+
+.news-card-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.news-card-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.news-date {
+  font-size: 11px;
+  color: #717182;
+}
+
+.news-title {
+  margin: 8px 0 0;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 23px;
+  color: #0a0a0a;
+  letter-spacing: normal;
+}
+
+.news-summary {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #717182;
+}
+
+.news-link {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 13px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  background: #fff;
+  color: #0a0a0a;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.news-link:hover {
+  background: rgba(0, 0, 0, 0.03);
+}

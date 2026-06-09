@@ -1,251 +1,207 @@
-import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { getMe, getSalesMemos, type Me, type SalesMemo, type SalesMemoResult } from '../api'
-import { CloseIcon, LogoutIcon, MenuIcon, MoonIcon, SunIcon } from '../components/icons'
-import { useTheme } from '../useTheme'
-import '../auth.css'
-import '../mail.css'
+import { Link } from 'react-router-dom'
+import AppShell from '../components/AppShell'
+import { ArrowDownIcon, ArrowUpIcon, ExternalLinkIcon } from '../components/icons'
 
-// "2026-06-04" / "2026-06-04T00:00:00" → "2026-06-04"
-function fmtDate(v: string | null): string {
-  return v ? v.slice(0, 10) : ''
+// NOTE: 소비자 동향/뉴스 백엔드 API 가 아직 없어 디자인의 예시 데이터를 그대로 사용한다.
+//       API 연동 시 아래 상수만 교체하면 된다.
+
+type Trend = 'up' | 'down' | 'flat'
+interface TopProduct {
+  category: string
+  name: string
+  trend: Trend
+  value: number
 }
+const TOP_PRODUCTS: TopProduct[] = [
+  { category: '바닥재', name: '포그그레이', trend: 'up', value: 2 },
+  { category: '바닥재', name: '조슈아라이트', trend: 'down', value: 1 },
+  { category: '시트재', name: '콘크리트화이트', trend: 'flat', value: 0 },
+  { category: '바닥재', name: '내추럴오크', trend: 'up', value: 3 },
+  { category: '가구재', name: '스모크월넛', trend: 'down', value: 2 },
+]
 
-// "2026-06-05T09:14:54" → "2026-06-05 09:14:54"
-function fmtDateTime(v: string | null): string {
-  if (!v) return ''
-  const [d, t] = v.split('T')
-  return t ? `${d} ${t.slice(0, 8)}` : d
+type TagKind = 'red' | 'azure' | 'green' | 'yellow'
+interface NewsItem {
+  source: string
+  tag: string
+  kind: TagKind
+  title: string
+  date: string
 }
+const NEWS: NewsItem[] = [
+  {
+    source: 'LX하우시스',
+    tag: '신제품·출시',
+    kind: 'red',
+    title: 'LX하우시스, 친환경 바닥재 신제품 라인 출시',
+    date: '06.03',
+  },
+  {
+    source: '동화자연마루',
+    tag: '실적·재무',
+    kind: 'azure',
+    title: '동화자연마루 2분기 영업이익 전년比 12% 증가',
+    date: '06.02',
+  },
+  {
+    source: '한솔',
+    tag: '친환경·인증',
+    kind: 'green',
+    title: '한솔홈데코, 저탄소 인증 마루 제품 확대',
+    date: '06.02',
+  },
+  {
+    source: 'KCC',
+    tag: '유통·채널',
+    kind: 'yellow',
+    title: 'KCC, 건자재 유통망 재편 본격화',
+    date: '06.01',
+  },
+]
 
-// 목록 미리보기: 채워진 항목의 첫 줄
-function previewLine(memo: SalesMemo): string {
-  for (const v of [memo.activity_plan, memo.strategy, memo.takeaway, memo.product]) {
-    if (v && v.trim()) return v.trim().split('\n')[0]
-  }
-  return ''
+interface MemoItem {
+  title: string
+  author: string
+  team: string
+  tags: string[]
 }
+const MEMOS: MemoItem[] = [
+  {
+    title: '○○인테리어, 포그그레이 대량 견적 문의',
+    author: '박수석',
+    team: '바닥재 영업',
+    tags: ['포그그레이', '대구', '견적'],
+  },
+  {
+    title: '수원 △△매장, 내추럴오크 샘플 추가 요청',
+    author: '김책임',
+    team: '바닥재 영업',
+    tags: ['내추럴오크', '수원', '샘플'],
+  },
+  {
+    title: '주간 상담 메모 공유 (포그그레이 문의 다수)',
+    author: '이선임',
+    team: '바닥재 영업',
+    tags: ['포그그레이', '고객반응', '주간'],
+  },
+  {
+    title: '상업공간 프로젝트 LX 경쟁 상황 공유',
+    author: '이선임',
+    team: '상업공간 파트너팀',
+    tags: ['경쟁사', '상업공간', 'LX'],
+  },
+]
 
-// DB 컬럼으로 원본 HSP Sales Memo 표를 재구성해 보여준다.
-function MemoTable({ memo }: { memo: SalesMemo }) {
+function TrendBadge({ trend, value }: { trend: Trend; value: number }) {
+  if (trend === 'flat') return <span className="dash-trend flat">―</span>
+  const up = trend === 'up'
   return (
-    <table className="memo-table">
-      <tbody>
-        <tr>
-          <td className="memo-label">거래선</td>
-          <td className="memo-value" colSpan={3}>
-            {memo.customer_name}
-          </td>
-        </tr>
-        <tr>
-          <td className="memo-label">방문예정일</td>
-          <td className="memo-value">{fmtDate(memo.planned_visit_date)}</td>
-          <td className="memo-label">방문일</td>
-          <td className="memo-value">{fmtDate(memo.visit_date)}</td>
-        </tr>
-        <tr>
-          <td className="memo-label">작성자</td>
-          <td className="memo-value">{memo.author_name}</td>
-          <td className="memo-label">작성일</td>
-          <td className="memo-value">{fmtDateTime(memo.written_at)}</td>
-        </tr>
-        <tr>
-          <td className="memo-label">활동계획</td>
-          <td className="memo-value" colSpan={3}>
-            {memo.activity_plan}
-          </td>
-        </tr>
-        <tr>
-          <td className="memo-label">전략</td>
-          <td className="memo-value" colSpan={3}>
-            {memo.strategy}
-          </td>
-        </tr>
-        <tr>
-          <td className="memo-label">운영</td>
-          <td className="memo-value" colSpan={3}>
-            {memo.operation}
-          </td>
-        </tr>
-        <tr>
-          <td className="memo-label">제품</td>
-          <td className="memo-value" colSpan={3}>
-            {memo.product}
-          </td>
-        </tr>
-        <tr>
-          <td className="memo-label">개인</td>
-          <td className="memo-value" colSpan={3}>
-            {memo.personal}
-          </td>
-        </tr>
-        <tr>
-          <td className="memo-label">영업사원 시사점</td>
-          <td className="memo-value" colSpan={3}>
-            {memo.takeaway}
-          </td>
-        </tr>
-        <tr>
-          <td className="memo-label">팀장 피드백</td>
-          <td className="memo-value" colSpan={3}>
-            {memo.followup_plan}
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <span className={`dash-trend ${up ? 'up' : 'down'}`}>
+      {up ? <ArrowUpIcon /> : <ArrowDownIcon />}
+      {value}
+    </span>
   )
 }
 
 export default function Home() {
-  const navigate = useNavigate()
-  const [theme, toggleTheme] = useTheme()
-  const [me, setMe] = useState<Me | null>(null)
-  const [result, setResult] = useState<SalesMemoResult | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-
-  // 햄버거 메뉴 열림 상태
-  const [menuOpen, setMenuOpen] = useState(false)
-  const menuRef = useRef<HTMLDivElement>(null)
-
-  // 펼친 메모의 id
-  const [openId, setOpenId] = useState<number | null>(null)
-
-  // 메뉴 바깥 클릭 / ESC 로 닫기
-  useEffect(() => {
-    if (!menuOpen) return
-    function onClick(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false)
-    }
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') setMenuOpen(false)
-    }
-    document.addEventListener('mousedown', onClick)
-    document.addEventListener('keydown', onKey)
-    return () => {
-      document.removeEventListener('mousedown', onClick)
-      document.removeEventListener('keydown', onKey)
-    }
-  }, [menuOpen])
-
-  useEffect(() => {
-    const token = localStorage.getItem('access_token')
-    if (!token) {
-      navigate('/login')
-      return
-    }
-    // 인증(getMe)과 영업일지(getSalesMemos)를 분리한다.
-    //  - getMe 실패 = 토큰 만료/무효 → 로그아웃 후 로그인으로.
-    //  - getSalesMemos 실패 = DB 쪽 문제 → 로그인은 유지하고 메시지만 표시.
-    getMe(token)
-      .then((meRes) => {
-        setMe(meRes)
-        return getSalesMemos(token)
-          .then(setResult)
-          .catch((err) => {
-            setError(err instanceof Error ? err.message : '영업일지를 불러오지 못했습니다.')
-          })
-      })
-      .catch(() => {
-        localStorage.removeItem('access_token')
-        localStorage.removeItem('email')
-        navigate('/login')
-      })
-      .finally(() => setLoading(false))
-  }, [navigate])
-
-  function toggle(id: number) {
-    setOpenId((cur) => (cur === id ? null : id))
-  }
-
-  function logout() {
-    localStorage.removeItem('access_token')
-    localStorage.removeItem('email')
-    navigate('/login')
-  }
-
-  const memos = result?.memos ?? []
-
   return (
-    <div className="mail-page">
-      <header className="mail-header">
-        <div className="mail-title">
-          <h1>영업일지</h1>
-          <p className="mail-sub">
-            {result ? `전체 ${result.total}건 · 최신순` : 'ai.hansolhomedeco@gmail.com'}
-          </p>
+    <AppShell>
+      <div className="dash-greeting">
+        <h1>안녕하세요, 김영업님</h1>
+        <p>오늘 · 2026.06.06</p>
+      </div>
+
+      {/* 소비자 동향 */}
+      <section className="dash-card">
+        <div className="dash-card-head">
+          <h2>소비자 동향</h2>
+          <Link to="/trends" className="dash-link">
+            소비자 동향 전체 보기 →
+          </Link>
         </div>
+        <div className="dash-trends-grid">
+          <div className="dash-trends-left">
+            <p className="dash-caption">제품 언급량 Top 5 · 최근 7일</p>
+            <ul className="dash-top5">
+              {TOP_PRODUCTS.map((p, i) => (
+                <li key={p.name} className="dash-top5-row">
+                  <span className={`dash-rank${i >= 3 ? ' muted' : ''}`}>{i + 1}</span>
+                  <span className="dash-chip outline">{p.category}</span>
+                  <span className="dash-product">{p.name}</span>
+                  <TrendBadge trend={p.trend} value={p.value} />
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="dash-ai">
+            <span className="dash-ai-label">AI 위클리 브리핑 · 06.06</span>
+            <p>
+              최근 7일간 포그그레이 언급량이 2계단 상승해 1위를 기록했습니다. 셀인카페에서는 시공
+              후기, 오늘의집에서는 사용 경험 공유가 주를 이뤘습니다.
+            </p>
+            <p>
+              콘크리트화이트는 변색 관련 부정 언급이 일부 관찰됐습니다. 내추럴오크와 스모크월넛은 비교
+              검토 맥락에서 함께 언급되는 빈도가 늘었습니다.
+            </p>
+          </div>
+        </div>
+      </section>
 
-        <div className="mail-menu" ref={menuRef}>
-          <button
-            className="mail-hamburger"
-            type="button"
-            onClick={() => setMenuOpen((o) => !o)}
-            aria-label="메뉴"
-            aria-expanded={menuOpen}
-          >
-            {menuOpen ? <CloseIcon /> : <MenuIcon />}
-          </button>
-
-          {menuOpen && (
-            <div className="mail-menu-panel" role="menu">
-              {me && (
-                <div className="mail-menu-account">
-                  <span className="mail-menu-label">로그인 계정</span>
-                  <span className="mail-menu-email">{me.email}</span>
+      <div className="dash-bottom-grid">
+        {/* 뉴스 */}
+        <section className="dash-card">
+          <div className="dash-card-head">
+            <h2>뉴스</h2>
+            <Link to="/news" className="dash-link">
+              뉴스 전체 보기 →
+            </Link>
+          </div>
+          <ul className="dash-list">
+            {NEWS.map((n) => (
+              <li key={n.title} className="dash-news-row">
+                <div className="dash-news-meta">
+                  <span className="dash-chip outline">{n.source}</span>
+                  <span className={`dash-chip tag-${n.kind}`}>{n.tag}</span>
+                  <span className="dash-date">{n.date}</span>
                 </div>
-              )}
-              <button
-                className="mail-menu-item"
-                type="button"
-                role="menuitem"
-                onClick={toggleTheme}
-              >
-                {theme === 'dark' ? <SunIcon size={18} /> : <MoonIcon size={18} />}
-                {theme === 'dark' ? '라이트 모드' : '다크 모드'}
-              </button>
-              <button
-                className="mail-menu-item danger"
-                type="button"
-                role="menuitem"
-                onClick={logout}
-              >
-                <LogoutIcon />
-                로그아웃
-              </button>
-            </div>
-          )}
-        </div>
-      </header>
+                <div className="dash-news-title">
+                  <span>{n.title}</span>
+                  <button type="button" className="dash-ext" aria-label="원문 보기">
+                    <ExternalLinkIcon />
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
 
-      {loading && <p className="mail-empty">불러오는 중…</p>}
-      {error && <div className="auth-msg error">{error}</div>}
-
-      {!loading && !error && result && (
-        <ul className="mail-list">
-          {memos.length === 0 && <li className="mail-empty">영업일지가 없습니다.</li>}
-          {memos.map((memo) => (
-            <li
-              key={memo.id}
-              className={`mail-item${openId === memo.id ? ' open' : ''}`}
-            >
-              <button className="mail-row" type="button" onClick={() => toggle(memo.id)}>
-                <span className="mail-from">{memo.author_name || '작성자 미상'}</span>
-                <span className="mail-subject">{memo.customer_name || '(거래선 없음)'}</span>
-                <span className="mail-snippet">{previewLine(memo)}</span>
-                <span className="mail-date">
-                  {fmtDateTime(memo.written_at) || fmtDate(memo.visit_date)}
+        {/* 세일즈 메모 */}
+        <section className="dash-card">
+          <div className="dash-card-head">
+            <h2>세일즈 메모</h2>
+            <Link to="/sales-memo" className="dash-link">
+              세일즈 메모 전체 보기 →
+            </Link>
+          </div>
+          <ul className="dash-list">
+            {MEMOS.map((m) => (
+              <li key={m.title} className="dash-memo-row">
+                <span className="dash-memo-title">{m.title}</span>
+                <span className="dash-memo-author">
+                  {m.author} · {m.team}
                 </span>
-              </button>
-              {openId === memo.id && (
-                <div className="mail-body">
-                  <MemoTable memo={memo} />
+                <div className="dash-tags">
+                  {m.tags.map((t) => (
+                    <span key={t} className="dash-hashtag">
+                      #{t}
+                    </span>
+                  ))}
                 </div>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
+    </AppShell>
   )
 }

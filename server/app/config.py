@@ -45,12 +45,34 @@ class Settings(BaseSettings):
     sales_memo_query: str = 'subject:"HSP SalesMemo"'    # 대상 메일 Gmail 검색식
     sales_memo_max_scan: int = 30                        # 한 번에 훑을 최근 메일 수
 
+    # === 로컬 LLM (Ollama) — AI 위클리 브리핑 생성 ===
+    #  컨테이너에서는 OLLAMA_URL=http://host.docker.internal:11434 로 호스트 ollama 사용.
+    ollama_url: str = "http://127.0.0.1:11434"
+    ollama_model: str = "qwen2.5:14b"
+    # 메일 적재 시 3줄 AI 요약을 백그라운드로 미리 생성해 sales_memo.ai_summary 에 저장.
+    ai_summary_enabled: bool = True
+    ai_summary_interval: int = 2  # 한 건 생성 후 대기(초). GPU 과점유 방지
+
+    # === 부서/팀 ===
+    #  회원가입 팀 선택지이자 세일즈 메모 '부서' 필터의 단일 출처 (실제 조직표).
+    departments: str = (
+        "공간솔루션팀,시판사업성장팀,데코솔루션팀,가구솔루션팀,"
+        "상업공간파트너팀,건자재솔루션1팀,건자재솔루션2팀,브랜드마케팅팀"
+    )
+    #  사용자 부서를 모를 때(미로그인/부서 미입력) 쓰는 '본인 부서' 폴백.
+    my_department: str = "공간솔루션팀"
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
     @property
     def allowed_domains(self) -> list[str]:
         """쉼표로 구분된 도메인 문자열 -> 소문자 리스트."""
         return [d.strip().lower() for d in self.allowed_email_domains.split(",") if d.strip()]
+
+    @property
+    def department_list(self) -> list[str]:
+        """쉼표로 구분된 부서 문자열 -> 리스트."""
+        return [d.strip() for d in self.departments.split(",") if d.strip()]
 
     @property
     def mail_from(self) -> str:

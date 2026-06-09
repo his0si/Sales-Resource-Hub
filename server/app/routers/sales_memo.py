@@ -5,9 +5,13 @@ Gmail 로 들어온 [HSP SalesMemo] 메일은 폴러(sales_memo_sync)가 DB 에 
 로그인한 앱 사용자(Bearer)만 접근 가능.
 """
 
-from fastapi import APIRouter, Depends, Query
+import time
+from datetime import date, datetime, timedelta
 
-from app import db
+from fastapi import APIRouter, Depends, HTTPException, Query
+
+from app import categories, db, employees, llm, sales_memo_ai
+from app.config import settings
 from app.routers.auth import get_current_user
 
 router = APIRouter(prefix="/api", tags=["sales-memo"])
@@ -18,7 +22,7 @@ _FIELDS = """
     author_name, author_emp_no,
     planned_visit_date, visit_date, written_at,
     activity_plan, strategy, operation, product, personal, takeaway, followup_plan,
-    gmail_id
+    gmail_id, ai_summary
 """
 
 
@@ -44,3 +48,199 @@ async def list_sales_memo(
     )
     total = await pool.fetchval("SELECT count(*) FROM sales_memo")
     return {"count": len(rows), "total": total, "memos": [dict(r) for r in rows]}
+
+
+# ============================================================
+# 세일즈 메모 보드 (/sales-memo 새 디자인) — 카테고리(부서) 분류 + 해시태그
+# ============================================================
+
+def _fmt_md(value) -> str:
+    """date/datetime -> 'MM.DD' (없으면 빈 문자열)."""
+    if isinstance(value, (datetime, date)):
+        return value.strftime("%m.%d")
+    return ""
+
+
+def _first_line(text: str | None) -> str:
+    if not text:
+        return ""
+    for line in text.splitlines():
+        line = line.strip()
+        if line:
+            return line[:46]
+    return ""
+
+
+def _board_item(
+    memo: dict,
+    my_dept: str,
+    recent_after: date | None,
+    directory: employees.EmployeeDirectory,
+) -> dict:
+    author = memo.get("author_name") or "작성자 미상"
+    # 메모의 부서/부문 = 작성자(사번 우선, 성명 폴백)를 조직표와 대조해 판별
+    dept, division = directory.lookup(memo.get("author_emp_no"), memo.get("author_name"))
+    prod_cat = categories.classify(memo)  # 해시태그(제품군)용 분류
+    customer = (memo.get("customer_name") or "").strip()
+    head = _first_line(memo.get("activity_plan"))
+    if customer and head:
+        title = f"{customer}, {head}"
+    else:
+        title = customer or head or "(제목 없음)"
+
+    written = memo.get("written_at")
+    visited = memo.get("visit_date")
+    when = written if isinstance(written, (datetime, date)) else visited
+    when_date = when.date() if isinstance(when, datetime) else when
+
+    return {
+        "id": memo["id"],
+        "title": title,
+        "dept": dept,
+        "division": division,
+        "own": dept is not None and dept == my_dept,
+        "unread": bool(recent_after and when_date and when_date >= recent_after),
+        "author": author,
+        "date": _fmt_md(when),
+        "tags": categories.extract_tags(memo, prod_cat),
+        "summary": sales_memo_ai.split_summary(memo.get("ai_summary")),
+        "gmail_id": memo.get("gmail_id"),
+    }
+
+
+@router.get("/sales-memo/board")
+async def sales_memo_board(
+    dept: str | None = Query(None, description="부서(팀) 필터. 미지정=본인 부서 우선, '전체'=전체"),
+    limit: int = Query(100, ge=1, le=500),
+    _user: dict = Depends(get_current_user),
+):
+    """세일즈 메모를 보드 카드로 가공해 반환. 본인(로그인 사용자) 부서 우선 정렬."""
+    pool = db.get_pool()
+    rows = await pool.fetch(
+        f"""
+        SELECT {_FIELDS}
+        FROM sales_memo
+        ORDER BY written_at DESC NULLS LAST, visit_date DESC NULLS LAST, id DESC
+        LIMIT $1
+        """,
+        limit,
+    )
+    my_dept = _user.get("department") or settings.my_department
+    directory = await employees.load_directory(pool)
+    # 최신 작성일 기준 1일 이내를 '새 글(점 채움)'로 표시
+    newest = max(
+        (r["written_at"].date() if isinstance(r["written_at"], datetime) else r["written_at"])
+        for r in rows
+        if r["written_at"]
+    ) if rows else None
+    recent_after = newest - timedelta(days=1) if newest else None
+
+    items = [_board_item(dict(r), my_dept, recent_after, directory) for r in rows]
+
+    if dept == "전체":
+        pass  # 최신순 그대로
+    elif dept:
+        items = [it for it in items if it["dept"] == dept]
+    else:
+        # 본인 부서 우선(기본): 본인 부서를 위로, 그 안에서는 최신순 유지
+        items.sort(key=lambda it: not it["own"])
+
+    return {
+        "count": len(items),
+        "my_department": my_dept,
+        "departments": settings.department_list,
+        "items": items,
+    }
+
+
+# ---- AI 위클리 브리핑 (로컬 LLM) ----
+_briefing_cache: dict = {"key": None, "text": None, "at": 0.0}
+_BRIEFING_TTL = 1800  # 30분 캐시
+
+
+def _briefing_prompt(my_dept: str, memos: list[dict]) -> str:
+    lines = []
+    for m in memos:
+        cust = (m.get("customer_name") or "").strip()
+        plan = _first_line(m.get("activity_plan"))
+        take = _first_line(m.get("takeaway"))
+        piece = " / ".join(p for p in [cust, plan, take] if p)
+        if piece:
+            lines.append(f"- {piece}")
+    memo_block = "\n".join(lines[:40]) or "- (최근 메모 없음)"
+    return (
+        "당신은 한솔홈데코 영업 지원 어시스턴트입니다. 아래는 최근 영업 메모 목록입니다.\n"
+        f"'{my_dept}' 부서 관점에서, 자주 등장한 제품·지역·이슈와 주목할 거래선 동향을 "
+        "한국어 3~4문장으로 요약해 주세요. 목록에 없는 내용은 지어내지 말고, "
+        "존댓말 평서문으로 작성하세요. 머리말이나 목록 없이 본문만 출력하세요.\n\n"
+        f"[최근 영업 메모]\n{memo_block}\n\n[주간 브리핑]\n"
+    )
+
+
+@router.get("/sales-memo/briefing")
+async def sales_memo_briefing(_user: dict = Depends(get_current_user)):
+    """최근 메모를 로컬 LLM(Ollama)으로 요약한 AI 위클리 브리핑."""
+    my_dept = _user.get("department") or settings.my_department
+    now = time.time()
+    if (
+        _briefing_cache["key"] == my_dept
+        and _briefing_cache["text"]
+        and now - _briefing_cache["at"] < _BRIEFING_TTL
+    ):
+        return {"briefing": _briefing_cache["text"], "cached": True}
+
+    pool = db.get_pool()
+    rows = await pool.fetch(
+        f"""
+        SELECT {_FIELDS}
+        FROM sales_memo
+        ORDER BY written_at DESC NULLS LAST, visit_date DESC NULLS LAST, id DESC
+        LIMIT 40
+        """
+    )
+    if not rows:
+        raise HTTPException(status_code=404, detail="브리핑할 메모가 없습니다.")
+
+    prompt = _briefing_prompt(my_dept, [dict(r) for r in rows])
+    try:
+        text = await llm.generate(prompt)
+    except llm.LLMError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+    _briefing_cache.update(key=my_dept, text=text, at=now)
+    return {"briefing": text, "cached": False}
+
+
+# 단건 원문 조회 (보드 카드의 "원문" 모달에서 사용). 정적 경로(board/briefing) 뒤에 선언.
+@router.get("/sales-memo/{memo_id}")
+async def get_sales_memo(memo_id: int, _user: dict = Depends(get_current_user)):
+    pool = db.get_pool()
+    row = await pool.fetchrow(f"SELECT {_FIELDS} FROM sales_memo WHERE id = $1", memo_id)
+    if not row:
+        raise HTTPException(status_code=404, detail="메모를 찾을 수 없습니다.")
+    # 작성자(사번 우선, 성명 폴백)를 조직표와 대조해 부서/부문 판별
+    directory = await employees.load_directory(pool)
+    dept, division = directory.lookup(row["author_emp_no"], row["author_name"])
+    return {**dict(row), "dept": dept, "division": division}
+
+
+# ---- 메모별 3줄 AI 요약 (DB 저장분 우선, 없으면 즉석 생성) ----
+@router.get("/sales-memo/{memo_id}/summary")
+async def sales_memo_summary(memo_id: int, _user: dict = Depends(get_current_user)):
+    """저장된 ai_summary 가 있으면 즉시 반환, 없으면 그 자리에서 생성·저장."""
+    pool = db.get_pool()
+    row = await pool.fetchrow(f"SELECT {_FIELDS} FROM sales_memo WHERE id = $1", memo_id)
+    if not row:
+        raise HTTPException(status_code=404, detail="메모를 찾을 수 없습니다.")
+    if row["ai_summary"]:
+        return {"summary": sales_memo_ai.split_summary(row["ai_summary"]), "cached": True}
+    try:
+        bullets = await sales_memo_ai.summarize(dict(row))
+    except llm.LLMError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+    await pool.execute(
+        "UPDATE sales_memo SET ai_summary = $1 WHERE id = $2",
+        sales_memo_ai.join_summary(bullets),
+        memo_id,
+    )
+    return {"summary": bullets, "cached": False}

@@ -24,15 +24,19 @@ CREATE TABLE users (
     email       VARCHAR(255) UNIQUE NOT NULL,             -- 이메일 (회사 내부 이메일만 허용)
     password    VARCHAR(255) NOT NULL,                    -- 비밀번호 (bcrypt 해싱)
     is_verified BOOLEAN      DEFAULT FALSE,               -- 이메일 인증 여부
+    name        VARCHAR(100),                             -- 이름 (회원가입 시 입력)
+    department  VARCHAR(100),                             -- 부서/팀 (회원가입 시 선택)
     created_at  TIMESTAMP    DEFAULT NOW()                -- 계정 생성일
 );
 
 -- 6. 예시 데이터 1건 (평문 'password123' 을 bcrypt 로 저장)
-INSERT INTO users (email, password, is_verified)
+INSERT INTO users (email, password, is_verified, name, department)
 VALUES (
     'admin@hansolax.com',
     crypt('password123', gen_salt('bf')),   -- bcrypt 해시 ($2a$...)
-    TRUE
+    TRUE,
+    '관리자',
+    '공간솔루션팀'
 );
 
 RESET ROLE;

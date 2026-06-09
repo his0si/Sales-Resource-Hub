@@ -4,29 +4,48 @@ const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000";
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_URL}${path}`, {
-    headers: { "Content-Type": "application/json", ...(options?.headers ?? {}) },
+    // ...options 를 먼저 펼치고 headers 를 마지막에 둬야 Content-Type 이
+    // options.headers(Authorization 등)에 덮이지 않는다.
     ...options,
+    headers: { "Content-Type": "application/json", ...(options?.headers ?? {}) },
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const detail = (data as { detail?: string }).detail;
-    throw new Error(detail ?? `요청 실패 (${res.status})`);
+    throw new Error(parseDetail((data as { detail?: unknown }).detail, res.status));
   }
   return data as T;
+}
+
+// FastAPI 의 detail 은 문자열(HTTPException) 또는 검증오류 배열([{msg,...}]) 둘 다 가능.
+// 배열이면 사람이 읽을 수 있는 메시지로 합쳐 "[object Object]" 노출을 막는다.
+function parseDetail(detail: unknown, status: number): string {
+  if (typeof detail === "string") return detail;
+  if (Array.isArray(detail)) {
+    const msgs = detail
+      .map((e) => (e && typeof e === "object" && "msg" in e ? String((e as { msg: unknown }).msg) : ""))
+      .filter(Boolean);
+    if (msgs.length) return msgs.join(", ");
+  }
+  return `요청 실패 (${status})`;
 }
 
 export function getHealth(): Promise<{ status: string }> {
   return request("/api/health");
 }
 
-export function getAuthConfig(): Promise<{ allowed_domains: string[] }> {
+export function getAuthConfig(): Promise<{ allowed_domains: string[]; departments: string[] }> {
   return request("/api/auth/config");
 }
 
-export function register(email: string, password: string): Promise<{ message: string }> {
+export function register(
+  email: string,
+  password: string,
+  name?: string,
+  department?: string,
+): Promise<{ message: string }> {
   return request("/api/auth/register", {
     method: "POST",
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email, password, name, department }),
   });
 }
 
@@ -47,12 +66,37 @@ export interface Me {
   id: number;
   email: string;
   is_verified: boolean;
+  name: string | null;
+  department: string | null;
   created_at: string;
 }
 
 export function getMe(token: string): Promise<Me> {
   return request("/api/auth/me", {
     headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+export function changePassword(
+  token: string,
+  current_password: string,
+  new_password: string,
+): Promise<{ message: string }> {
+  return request("/api/auth/change-password", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ current_password, new_password }),
+  });
+}
+
+export function updateProfile(
+  token: string,
+  data: { name?: string; department?: string },
+): Promise<Me> {
+  return request("/api/auth/profile", {
+    method: "PATCH",
+    headers: { Authorization: `Bearer ${token}` },
+    body: JSON.stringify(data),
   });
 }
 
@@ -129,6 +173,78 @@ export interface SalesMemoResult {
 
 export function getSalesMemos(token: string, limit = 500): Promise<SalesMemoResult> {
   return request(`/api/sales-memo?limit=${limit}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+// 단건 원문 조회 (보드 카드 "원문" 모달용)
+export function getSalesMemo(token: string, id: number): Promise<SalesMemo> {
+  return request(`/api/sales-memo/${id}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+// 메모 1건의 3줄 AI 요약 (카드 펼침 "AI 개요")
+export function getSalesMemoSummary(
+  token: string,
+  id: number,
+): Promise<{ summary: string[]; cached: boolean }> {
+  return request(`/api/sales-memo/${id}/summary`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+// === 제품 카테고리(부서) — categories.json 기반 ===
+
+export interface CategoriesResult {
+  categories: string[];
+  tree: Record<string, string[]>;
+  my_department: string;
+}
+
+export function getCategories(token: string): Promise<CategoriesResult> {
+  return request("/api/categories", {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+// === 세일즈 메모 보드 (부서 분류 + 해시태그) ===
+
+export interface MemoBoardItem {
+  id: number;
+  title: string;
+  dept: string | null;
+  own: boolean;
+  unread: boolean;
+  author: string;
+  date: string;
+  tags: string[];
+  summary: string[]; // 미리 생성된 3줄 AI 요약 (없으면 빈 배열)
+  gmail_id: string | null;
+}
+
+export interface MemoBoardResult {
+  count: number;
+  my_department: string;
+  departments: string[];
+  items: MemoBoardItem[];
+}
+
+export function getSalesMemoBoard(
+  token: string,
+  dept?: string,
+  limit = 500,
+): Promise<MemoBoardResult> {
+  const params = new URLSearchParams({ limit: String(limit) });
+  if (dept) params.set("dept", dept);
+  return request(`/api/sales-memo/board?${params}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+// AI 위클리 브리핑 (로컬 LLM 생성)
+export function getSalesMemoBriefing(token: string): Promise<{ briefing: string; cached: boolean }> {
+  return request("/api/sales-memo/briefing", {
     headers: { Authorization: `Bearer ${token}` },
   });
 }

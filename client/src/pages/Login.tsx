@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { login } from '../api'
+import AuthVisual from '../components/AuthVisual'
 import '../auth.css'
 
 // /api/auth/verify 가 리다이렉트하며 붙여주는 ?verified= 값에 대한 안내문구.
@@ -15,8 +16,11 @@ export default function Login() {
   const navigate = useNavigate()
   const verified = params.get('verified')
 
-  const [email, setEmail] = useState('')
+  // "아이디 저장" — 저장해둔 이메일이 있으면 미리 채운다.
+  const savedEmail = localStorage.getItem('saved_email') ?? ''
+  const [email, setEmail] = useState(savedEmail)
   const [password, setPassword] = useState('')
+  const [remember, setRemember] = useState(Boolean(savedEmail))
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -28,6 +32,8 @@ export default function Login() {
       const res = await login(email, password)
       localStorage.setItem('access_token', res.access_token)
       localStorage.setItem('email', res.email)
+      if (remember) localStorage.setItem('saved_email', email)
+      else localStorage.removeItem('saved_email')
       navigate('/')
     } catch (err) {
       setError(err instanceof Error ? err.message : '로그인에 실패했습니다.')
@@ -37,45 +43,72 @@ export default function Login() {
   }
 
   return (
-    <div className="auth-wrap">
-      <div className="auth-card">
-        <h1>로그인</h1>
-        <p className="auth-sub">한솔홈데코 HRBP(AX)</p>
+    <div className="auth">
+      <AuthVisual />
 
-        {verified && VERIFY_MSG[verified] && (
-          <div className={`auth-msg ${verified === 'success' ? 'ok' : 'error'}`}>
-            {VERIFY_MSG[verified]}
-          </div>
-        )}
-        {error && <div className="auth-msg error">{error}</div>}
-
+      <div className="auth-form-card">
         <form className="auth-form" onSubmit={onSubmit}>
-          <label>
-            이메일
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </label>
-          <label>
-            비밀번호
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </label>
-          <button className="auth-btn" type="submit" disabled={loading}>
-            {loading ? '로그인 중…' : '로그인'}
-          </button>
-        </form>
+          <h1>로그인</h1>
 
-        <p className="auth-foot">
-          계정이 없나요? <Link to="/register">회원가입</Link>
-        </p>
+          {verified && VERIFY_MSG[verified] && (
+            <div className={`auth-msg ${verified === 'success' ? 'ok' : 'error'}`}>
+              {VERIFY_MSG[verified]}
+            </div>
+          )}
+          {error && <div className="auth-msg error">{error}</div>}
+
+          <div className="auth-fields">
+            <div className="auth-field">
+              <label htmlFor="email">이메일</label>
+              <input
+                id="email"
+                className="auth-input"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="kim.sales@hansol.com"
+                autoComplete="email"
+                required
+              />
+            </div>
+
+            <div className="auth-field">
+              <label htmlFor="password">비밀번호</label>
+              <input
+                id="password"
+                className="auth-input"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                autoComplete="current-password"
+                required
+              />
+            </div>
+
+            <label className="auth-remember">
+              <input
+                type="checkbox"
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
+              />
+              <span>아이디 저장</span>
+            </label>
+          </div>
+
+          <div className="auth-actions">
+            <button className="auth-btn auth-btn-primary" type="submit" disabled={loading}>
+              {loading ? '로그인 중…' : '로그인'}
+            </button>
+            <button
+              className="auth-btn auth-btn-outline"
+              type="button"
+              onClick={() => navigate('/register')}
+            >
+              회원가입
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   )

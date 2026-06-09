@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS sales_memo (
     followup_plan       TEXT,                                -- F/UP 계획 (FOLLOWUP)
     activity_plan       TEXT,                                -- 활동계획 (PLAN)
     gmail_id            VARCHAR(40),                         -- 유입 메일 Gmail 메시지 id (메일유입분만, dedup 키)
+    ai_summary          TEXT,                                -- 로컬 LLM 3줄 요약(줄바꿈 구분). 폴러가 미리 생성
     created_at          TIMESTAMP    DEFAULT NOW()           -- 레코드 적재일
 );
 

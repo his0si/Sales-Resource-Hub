@@ -1,0 +1,359 @@
+
+[
+    {
+        "category": "바닥재",
+        "subcategory": "SB마루_스퀘어",
+        "variant": "600",
+        "depth2MenuId": "MENU0000000000010338",
+        "depth3MenuId": "MENU0000000000010343"
+    },
+    {
+        "category": "바닥재",
+        "subcategory": "SB마루_스퀘어",
+        "variant": "800",
+        "depth2MenuId": "MENU0000000000010338",
+        "depth3MenuId": "MENU0000000000010339"
+    },
+
+    {
+        "category": "바닥재",
+        "subcategory": "SB마루_스톤",
+        "variant": "395",
+        "depth2MenuId": "MENU0000000000010060",
+        "depth3MenuId": "MENU0000000000010337"
+    },
+
+    {
+        "category": "바닥재",
+        "subcategory": "SB마루_강",
+        "variant": "",
+        "depth2MenuId": "MENU0000000000010043",
+        "depth3MenuId": ""
+    },
+    {
+        "category": "바닥재",
+        "subcategory": "SB마루_강",
+        "variant": "95",
+        "depth2MenuId": "MENU0000000000010043",
+        "depth3MenuId": "MENU0000000000010342"
+    },
+    {
+        "category": "바닥재",
+        "subcategory": "SB마루_강",
+        "variant": "165",
+        "depth2MenuId": "MENU0000000000010043",
+        "depth3MenuId": "MENU0000000000010341"
+    },
+
+    {
+        "category": "바닥재",
+        "subcategory": "울트라",
+        "variant": "",
+        "depth2MenuId": "MENU0000000000010044",
+        "depth3MenuId": ""
+    },
+    {
+        "category": "바닥재",
+        "subcategory": "울트라",
+        "variant": "95",
+        "depth2MenuId": "MENU0000000000010044",
+        "depth3MenuId": "MENU0000000000010063"
+    },
+    {
+        "category": "바닥재",
+        "subcategory": "울트라",
+        "variant": "165",
+        "depth2MenuId": "MENU0000000000010044",
+        "depth3MenuId": "MENU0000000000010064"
+    },
+
+    {
+        "category": "바닥재",
+        "subcategory": "강화마루",
+        "variant": "",
+        "depth2MenuId": "MENU0000000000010045",
+        "depth3MenuId": ""
+    },
+    {
+        "category": "바닥재",
+        "subcategory": "강화마루",
+        "variant": "우드100",
+        "depth2MenuId": "MENU0000000000010045",
+        "depth3MenuId": "MENU0000000000010066"
+    },
+    {
+        "category": "바닥재",
+        "subcategory": "강화마루",
+        "variant": "우드190",
+        "depth2MenuId": "MENU0000000000010045",
+        "depth3MenuId": "MENU0000000000010068"
+    },
+    {
+        "category": "바닥재",
+        "subcategory": "강화마루",
+        "variant": "스톤390",
+        "depth2MenuId": "MENU0000000000010045",
+        "depth3MenuId": "MENU0000000000010254"
+    },
+
+    {
+        "category": "바닥재",
+        "subcategory": "데코타일",
+        "variant": "",
+        "depth2MenuId": "MENU0000000000010047",
+        "depth3MenuId": ""
+    },
+    {
+        "category": "바닥재",
+        "subcategory": "데코타일",
+        "variant": "스톤470",
+        "depth2MenuId": "MENU0000000000010047",
+        "depth3MenuId": "MENU0000000000010309"
+    },
+    {
+        "category": "바닥재",
+        "subcategory": "데코타일",
+        "variant": "스톤600",
+        "depth2MenuId": "MENU0000000000010047",
+        "depth3MenuId": "MENU0000000000010071"
+    },
+    {
+        "category": "바닥재",
+        "subcategory": "데코타일",
+        "variant": "우드184",
+        "depth2MenuId": "MENU0000000000010047",
+        "depth3MenuId": "MENU0000000000010072"
+    },
+    {
+        "category": "바닥재",
+        "subcategory": "데코타일",
+        "variant": "우븐470",
+        "depth2MenuId": "MENU0000000000010047",
+        "depth3MenuId": "MENU0000000000010310"
+    },
+
+    {
+        "category": "바닥재",
+        "subcategory": "스킨플로어",
+        "variant": "",
+        "depth2MenuId": "MENU0000000000010286",
+        "depth3MenuId": ""
+    },
+    {
+        "category": "바닥재",
+        "subcategory": "스킨플로어",
+        "variant": "165",
+        "depth2MenuId": "MENU0000000000010286",
+        "depth3MenuId": "MENU0000000000010360"
+    },
+    {
+        "category": "바닥재",
+        "subcategory": "스킨플로어",
+        "variant": "190",
+        "depth2MenuId": "MENU0000000000010286",
+        "depth3MenuId": "MENU0000000000010287"
+    },
+
+    {
+        "category": "바닥재",
+        "subcategory": "교실용 마루",
+        "variant": "",
+        "depth2MenuId": "MENU0000000000010046",
+        "depth3MenuId": ""
+    },
+    {
+        "category": "바닥재",
+        "subcategory": "교실용 마루",
+        "variant": "다이나믹플러스",
+        "depth2MenuId": "MENU0000000000010046",
+        "depth3MenuId": "MENU0000000000010070"
+    },
+    {
+        "category": "바닥재",
+        "subcategory": "교실용 마루",
+        "variant": "다이나믹스트롱",
+        "depth2MenuId": "MENU0000000000010046",
+        "depth3MenuId": "MENU0000000000010069"
+    },
+
+    {
+        "category": "가구재",
+        "subcategory": "스토리보드",
+        "variant": "",
+        "depth2MenuId": "MENU0000000000010057",
+        "depth3MenuId": ""
+    },
+    {
+        "category": "가구재",
+        "subcategory": "스토리보드",
+        "variant": "시그니처",
+        "depth2MenuId": "MENU0000000000010057",
+        "depth3MenuId": "MENU0000000000010255"
+    },
+    {
+        "category": "가구재",
+        "subcategory": "스토리보드",
+        "variant": "스페셜",
+        "depth2MenuId": "MENU0000000000010057",
+        "depth3MenuId": "MENU0000000000010256"
+    },
+    {
+        "category": "가구재",
+        "subcategory": "스토리보드",
+        "variant": "엔트리",
+        "depth2MenuId": "MENU0000000000010057",
+        "depth3MenuId": "MENU0000000000010178"
+    },
+    {
+        "category": "가구재",
+        "subcategory": "스토리보드",
+        "variant": "테크니컬",
+        "depth2MenuId": "MENU0000000000010057",
+        "depth3MenuId": "MENU0000000000010246"
+    },
+
+    {
+        "category": "벽장재",
+        "subcategory": "콜렉트월",
+        "variant": "",
+        "depth2MenuId": "MENU0000000000010251",
+        "depth3MenuId": ""
+    },
+    {
+        "category": "벽장재",
+        "subcategory": "콜렉트월",
+        "variant": "콜렉트월",
+        "depth2MenuId": "MENU0000000000010251",
+        "depth3MenuId": "MENU0000000000010252"
+    },
+
+    {
+        "category": "벽장재",
+        "subcategory": "스토리월",
+        "variant": "",
+        "depth2MenuId": "MENU0000000000010051",
+        "depth3MenuId": ""
+    },
+    {
+        "category": "벽장재",
+        "subcategory": "스토리월",
+        "variant": "390",
+        "depth2MenuId": "MENU0000000000010051",
+        "depth3MenuId": "MENU0000000000010347"
+    },
+    {
+        "category": "벽장재",
+        "subcategory": "스토리월",
+        "variant": "600",
+        "depth2MenuId": "MENU0000000000010051",
+        "depth3MenuId": "MENU0000000000010075"
+    },
+    {
+        "category": "벽장재",
+        "subcategory": "스토리월",
+        "variant": "800",
+        "depth2MenuId": "MENU0000000000010051",
+        "depth3MenuId": "MENU0000000000010076"
+    },
+
+    {
+        "category": "벽장재",
+        "subcategory": "커버베이직",
+        "variant": "",
+        "depth2MenuId": "MENU0000000000010248",
+        "depth3MenuId": ""
+    },
+    {
+        "category": "벽장재",
+        "subcategory": "커버베이직",
+        "variant": "스톤",
+        "depth2MenuId": "MENU0000000000010248",
+        "depth3MenuId": "MENU0000000000010250"
+    },
+    {
+        "category": "벽장재",
+        "subcategory": "커버베이직",
+        "variant": "우드",
+        "depth2MenuId": "MENU0000000000010248",
+        "depth3MenuId": "MENU0000000000010320"
+    },
+    {
+        "category": "벽장재",
+        "subcategory": "커버베이직",
+        "variant": "엠보",
+        "depth2MenuId": "MENU0000000000010248",
+        "depth3MenuId": "MENU0000000000010321"
+    },
+    {
+        "category": "벽장재",
+        "subcategory": "커버베이직",
+        "variant": "메탈",
+        "depth2MenuId": "MENU0000000000010248",
+        "depth3MenuId": "MENU0000000000010322"
+    },
+
+    {
+        "category": "인테리어 필름",
+        "subcategory": "스토리필름",
+        "variant": "",
+        "depth2MenuId": "MENU0000000000010297",
+        "depth3MenuId": ""
+    },
+    {
+        "category": "인테리어 필름",
+        "subcategory": "스토리필름",
+        "variant": "우드",
+        "depth2MenuId": "MENU0000000000010297",
+        "depth3MenuId": "MENU0000000000010299"
+    },
+    {
+        "category": "인테리어 필름",
+        "subcategory": "스토리필름",
+        "variant": "스톤",
+        "depth2MenuId": "MENU0000000000010297",
+        "depth3MenuId": "MENU0000000000010300"
+    },
+    {
+        "category": "인테리어 필름",
+        "subcategory": "스토리필름",
+        "variant": "패브릭",
+        "depth2MenuId": "MENU0000000000010297",
+        "depth3MenuId": "MENU0000000000010311"
+    },
+    {
+        "category": "인테리어 필름",
+        "subcategory": "스토리필름",
+        "variant": "솔리드",
+        "depth2MenuId": "MENU0000000000010297",
+        "depth3MenuId": "MENU0000000000010298"
+    },
+    {
+        "category": "인테리어 필름",
+        "subcategory": "스토리필름",
+        "variant": "방염",
+        "depth2MenuId": "MENU0000000000010297",
+        "depth3MenuId": "MENU0000000000010318"
+    },
+
+    {
+        "category": "세라믹",
+        "subcategory": "콜렉트스톤",
+        "variant": "",
+        "depth2MenuId": "MENU0000000000010371",
+        "depth3MenuId": ""
+    },
+    {
+        "category": "세라믹",
+        "subcategory": "콜렉트스톤",
+        "variant": "프리미엄(아틀라스콩코드)",
+        "depth2MenuId": "MENU0000000000010371",
+        "depth3MenuId": "MENU0000000000010365"
+    },
+    {
+        "category": "세라믹",
+        "subcategory": "콜렉트스톤",
+        "variant": "베이직",
+        "depth2MenuId": "MENU0000000000010371",
+        "depth3MenuId": "MENU0000000000010366"
+    }
+]

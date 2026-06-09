@@ -1,0 +1,97 @@
+{
+  "source": "https://drawer-campus-62659493.figma.site/ (제품 리스트)",
+  "captured_at": "2026-06-08",
+  "note": "제품군별 시리즈 필터는 함께 기록함. 단 화면에서는 '전체'만 노출되어 개별 제품의 소속 시리즈 매핑은 확인 불가(series=null).",
+  "categories": [
+    {
+      "category": "바닥재",
+      "series": ["SB마루_스퀘어", "SB마루_스톤", "SB마루_강", "울트라", "강화마루", "데코타일", "스킨플로어", "교실용 마루"],
+      "product_count": 26,
+      "products": [
+        { "name": "포그그레이", "series": null },
+        { "name": "조슈아라이트", "series": null },
+        { "name": "모던그레이지", "series": null },
+        { "name": "웜베이지", "series": null },
+        { "name": "콘크리트화이트", "series": null },
+        { "name": "라이트스톤", "series": null },
+        { "name": "스톤베이지", "series": null },
+        { "name": "내추럴오크", "series": null },
+        { "name": "스모크월넛", "series": null },
+        { "name": "빈티지애쉬", "series": null },
+        { "name": "라이트메이플", "series": null },
+        { "name": "다크챠콜", "series": null },
+        { "name": "딥에스프레소", "series": null },
+        { "name": "내추럴화이트", "series": null },
+        { "name": "클래식오크", "series": null },
+        { "name": "골든비치", "series": null },
+        { "name": "마블화이트", "series": null },
+        { "name": "컨크리트그레이", "series": null },
+        { "name": "우드그레이", "series": null },
+        { "name": "소프트베이지", "series": null },
+        { "name": "라이트우드", "series": null },
+        { "name": "밀크브라운", "series": null },
+        { "name": "체리브라운", "series": null },
+        { "name": "내추럴그린", "series": null },
+        { "name": "스카이블루", "series": null },
+        { "name": "선샤인옐로", "series": null }
+      ]
+    },
+    {
+      "category": "가구재",
+      "series": [],
+      "product_count": 5,
+      "products": [
+        { "name": "화이트글로스", "series": null },
+        { "name": "포그매트", "series": null },
+        { "name": "우드그레인", "series": null },
+        { "name": "다크월넛", "series": null },
+        { "name": "샌드베이지", "series": null }
+      ]
+    },
+    {
+      "category": "벽장재",
+      "series": ["콜렉트월", "스토리월", "커버베이직"],
+      "product_count": 11,
+      "products": [
+        { "name": "울트라화이트", "series": null },
+        { "name": "아이보리크림", "series": null },
+        { "name": "소프트그레이", "series": null },
+        { "name": "스틸블루", "series": null },
+        { "name": "내추럴월넛", "series": null },
+        { "name": "스모크그레이", "series": null },
+        { "name": "라이트오크", "series": null },
+        { "name": "딥네이비", "series": null },
+        { "name": "스노우화이트", "series": null },
+        { "name": "코튼베이지", "series": null },
+        { "name": "클라우드그레이", "series": null }
+      ]
+    },
+    {
+      "category": "인테리어필름",
+      "series": [],
+      "card_label": "필름",
+      "product_count": 6,
+      "products": [
+        { "name": "마블크림", "series": null },
+        { "name": "브러시드골드", "series": null },
+        { "name": "우드그레인매트", "series": null },
+        { "name": "카본블랙", "series": null },
+        { "name": "실버메탈", "series": null },
+        { "name": "로즈골드", "series": null }
+      ]
+    },
+    {
+      "category": "세라믹",
+      "series": [],
+      "product_count": 5,
+      "products": [
+        { "name": "포르셀레인화이트", "series": null },
+        { "name": "앤틱그레이", "series": null },
+        { "name": "모던블랙", "series": null },
+        { "name": "테라코타", "series": null },
+        { "name": "포레스트그린", "series": null }
+      ]
+    }
+  ],
+  "total_products": 53
+}

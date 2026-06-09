@@ -31,6 +31,8 @@ bearer = HTTPBearer(auto_error=True)
 class RegisterIn(BaseModel):
     email: EmailStr
     password: str = Field(min_length=8, description="8자 이상")
+    name: str | None = Field(default=None, max_length=100)
+    department: str | None = Field(default=None, max_length=100)
 
 
 class LoginIn(BaseModel):
@@ -50,8 +52,11 @@ def _check_domain(email: str) -> None:
 
 @router.get("/config")
 async def auth_config():
-    """프론트엔드가 허용 도메인을 표시/안내하는 데 사용 (도메인 단일 출처)."""
-    return {"allowed_domains": settings.allowed_domains}
+    """프론트엔드가 허용 도메인·부서 목록을 표시/안내하는 데 사용 (단일 출처)."""
+    return {
+        "allowed_domains": settings.allowed_domains,
+        "departments": settings.department_list,
+    }
 
 
 @router.post("/register")
@@ -68,15 +73,22 @@ async def register(body: RegisterIn):
 
     hashed = hash_password(body.password)
     if existing:
-        # 미인증 상태에서 재가입: 비밀번호 갱신 후 인증메일 재발송
+        # 미인증 상태에서 재가입: 비밀번호·이름·부서 갱신 후 인증메일 재발송
         await pool.execute(
-            "UPDATE users SET password = $1 WHERE email = $2", hashed, email
+            "UPDATE users SET password = $1, name = $2, department = $3 WHERE email = $4",
+            hashed,
+            body.name,
+            body.department,
+            email,
         )
     else:
         await pool.execute(
-            "INSERT INTO users (email, password, is_verified) VALUES ($1, $2, FALSE)",
+            "INSERT INTO users (email, password, is_verified, name, department) "
+            "VALUES ($1, $2, FALSE, $3, $4)",
             email,
             hashed,
+            body.name,
+            body.department,
         )
 
     token = create_verify_token(email)
@@ -128,7 +140,7 @@ async def get_current_user(cred: HTTPAuthorizationCredentials = Depends(bearer))
 
     pool = db.get_pool()
     user = await pool.fetchrow(
-        "SELECT id, email, is_verified, created_at FROM users WHERE email = $1",
+        "SELECT id, email, is_verified, name, department, created_at FROM users WHERE email = $1",
         email.lower(),
     )
     if not user:
@@ -139,3 +151,46 @@ async def get_current_user(cred: HTTPAuthorizationCredentials = Depends(bearer))
 @router.get("/me")
 async def me(user: dict = Depends(get_current_user)):
     return user
+
+
+class ChangePasswordIn(BaseModel):
+    current_password: str
+    new_password: str = Field(min_length=8, description="8자 이상")
+
+
+class ProfileIn(BaseModel):
+    name: str | None = Field(default=None, max_length=100)
+    department: str | None = Field(default=None, max_length=100)
+
+
+@router.post("/change-password")
+async def change_password(body: ChangePasswordIn, user: dict = Depends(get_current_user)):
+    """현재 비밀번호 확인 후 새 비밀번호로 변경."""
+    pool = db.get_pool()
+    row = await pool.fetchrow("SELECT password FROM users WHERE id = $1", user["id"])
+    if not row or not verify_password(body.current_password, row["password"]):
+        raise HTTPException(status_code=400, detail="현재 비밀번호가 올바르지 않습니다.")
+    await pool.execute(
+        "UPDATE users SET password = $1 WHERE id = $2",
+        hash_password(body.new_password),
+        user["id"],
+    )
+    return {"message": "비밀번호가 변경되었습니다."}
+
+
+@router.patch("/profile")
+async def update_profile(body: ProfileIn, user: dict = Depends(get_current_user)):
+    """이름/부서(팀) 수정. 전달된 항목만 갱신하고 갱신된 사용자 정보를 반환."""
+    pool = db.get_pool()
+    await pool.execute(
+        "UPDATE users SET name = COALESCE($1, name), department = COALESCE($2, department) "
+        "WHERE id = $3",
+        body.name,
+        body.department,
+        user["id"],
+    )
+    row = await pool.fetchrow(
+        "SELECT id, email, is_verified, name, department, created_at FROM users WHERE id = $1",
+        user["id"],
+    )
+    return dict(row)

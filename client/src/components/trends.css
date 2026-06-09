@@ -1,0 +1,869 @@
+/* ===== 소비자 동향 (메인/게시글/제품 리스트·상세) =====
+   app.css 의 dash-* 토큰을 재사용하고, 동향 전용 요소만 정의한다. */
+
+/* ---- 브레드크럼 ---- */
+.tr-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 16px;
+}
+
+.tr-crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tr-crumbs a {
+  font-size: 13px;
+  font-weight: 500;
+  color: #717182;
+  text-decoration: none;
+}
+
+.tr-crumbs a:hover {
+  color: #0a0a0a;
+}
+
+.tr-crumbs .current {
+  font-size: 13px;
+  color: #0a0a0a;
+}
+
+.tr-crumbs .sep {
+  display: inline-flex;
+  color: #717182;
+}
+
+/* ---- 채널 아바타 ---- */
+.tr-avatar {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  display: grid;
+  place-content: center;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.tr-avatar.ch-N {
+  background: #03c75a;
+}
+
+.tr-avatar.ch-O {
+  background: #35c5f0;
+}
+
+/* ---- 감정 칩 ---- */
+.tr-sent {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: 9999px;
+  border: 1px solid;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.tr-sent .name {
+  color: rgba(10, 10, 10, 0.8);
+}
+
+.tr-sent.pos {
+  background: #ecfdf5;
+  border-color: #a4f4cf;
+}
+.tr-sent.pos .word {
+  color: #007a55;
+}
+
+.tr-sent.neu {
+  background: #f5f5f5;
+  border-color: #e5e5e5;
+}
+.tr-sent.neu .word {
+  color: #525252;
+}
+
+.tr-sent.neg {
+  background: #fff1f2;
+  border-color: #ffccd3;
+}
+.tr-sent.neg .word {
+  color: #c70036;
+}
+
+/* ---- 카테고리 칩(스와치/미니카드) ---- */
+.tr-cat-chip {
+  align-self: flex-start;
+  padding: 3px 7px;
+  border-radius: 4px;
+  background: #fff;
+  border: 1px solid #d4d4d4;
+  color: #000;
+  font-size: 10px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* ---- 게시글 카드 ---- */
+.tr-post-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tr-post {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  text-decoration: none;
+}
+
+.tr-post:hover {
+  border-color: rgba(0, 0, 0, 0.22);
+}
+
+.tr-post-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tr-post-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.tr-post-title {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 21px;
+  color: #0a0a0a;
+}
+
+.tr-post-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.tr-date {
+  font-size: 11px;
+  color: #717182;
+}
+
+.tr-likes {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 11px;
+  color: #717182;
+}
+
+.tr-sent-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tr-post-ext {
+  flex-shrink: 0;
+  display: inline-flex;
+  padding: 8px;
+  border-radius: 8px;
+  color: #717182;
+}
+
+/* ---- AI 브리핑 배너(메인, 전폭) ---- */
+.tr-ai-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 20px;
+  background: #f6f1ea;
+  border: 1px solid #e6d8c4;
+  border-radius: 14px;
+}
+
+.tr-ai-banner p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.62;
+  color: rgba(10, 10, 10, 0.9);
+}
+
+/* ---- 메인 레이아웃 ---- */
+.tr-main-grid {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.tr-section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.tr-section-head h2 {
+  margin: 0;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  color: #0a0a0a;
+  letter-spacing: normal;
+}
+
+.tr-more {
+  padding: 6px 12px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  background: #fff;
+  color: #0a0a0a;
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.tr-more:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.tr-rank-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.tr-rank-list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-top: 0.8px solid rgba(0, 0, 0, 0.1);
+}
+
+.tr-top10-foot {
+  padding: 10px 12px;
+  border-top: 0.8px solid rgba(0, 0, 0, 0.1);
+  font-size: 11px;
+  line-height: 1.5;
+  color: #717182;
+}
+
+.tr-caption-right {
+  font-size: 12px;
+  color: #717182;
+}
+
+/* ---- 필터바(게시글 리스트) ---- */
+.tr-filterbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 14px;
+}
+
+.tr-filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 15px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 9999px;
+  background: #fff;
+  color: rgba(10, 10, 10, 0.8);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.tr-filter-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tr-filter-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 288px;
+  max-width: 100%;
+  height: 38px;
+  box-sizing: border-box;
+  padding: 0 13px;
+  background: #f3f3f5;
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  color: #717182;
+}
+
+.tr-filter-search input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  outline: none;
+  font: inherit;
+  font-size: 13px;
+  color: #0a0a0a;
+}
+
+.tr-filter-search input::placeholder {
+  color: rgba(10, 10, 10, 0.5);
+}
+
+.tr-reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 13px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 9999px;
+  background: #fff;
+  color: #717182;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+/* ---- 카운트/정렬 바 ---- */
+.tr-listbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.tr-count {
+  font-size: 12px;
+  color: #717182;
+}
+
+.tr-sort {
+  padding: 7px 15px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  background: #fff;
+  color: #0a0a0a;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* ---- 제품 리스트 ---- */
+.tr-cat-card {
+  padding: 9px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 14px;
+}
+
+.tr-cat-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tr-cat-row + .tr-cat-row {
+  margin-top: 9px;
+  padding-top: 9px;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.tr-cat-pill {
+  padding: 7px 15px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 9999px;
+  background: #fff;
+  color: rgba(10, 10, 10, 0.8);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.tr-cat-pill.active {
+  background: #7a5b3e;
+  border-color: #7a5b3e;
+  color: #fff;
+}
+
+.tr-subcat-pill {
+  padding: 5px 13px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 9999px;
+  background: #fff;
+  color: rgba(10, 10, 10, 0.7);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.tr-subcat-pill.active {
+  background: rgba(122, 91, 62, 0.1);
+  border-color: rgba(122, 91, 62, 0.3);
+  color: #5a4029;
+}
+
+.tr-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.tr-pcard {
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 14px;
+  text-decoration: none;
+}
+
+.tr-pcard:hover {
+  border-color: rgba(0, 0, 0, 0.22);
+}
+
+.tr-swatch {
+  aspect-ratio: 1 / 1;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.tr-pcard-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 4px 4px;
+}
+
+.tr-pcard-name {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 21px;
+  color: #0a0a0a;
+}
+
+.tr-pagination {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding-top: 8px;
+}
+
+.tr-page {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: #fff;
+  color: #0a0a0a;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.tr-page.active {
+  background: #7a5b3e;
+  border-color: #7a5b3e;
+  color: #fff;
+}
+
+/* ---- 게시글 상세 ---- */
+.tr-detail-card {
+  padding: 24px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 14px;
+}
+
+.tr-detail-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tr-detail-head .tr-date {
+  font-size: 12px;
+}
+
+.tr-detail-title {
+  margin: 12px 0 0;
+  font-family: inherit;
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 30px;
+  color: #0a0a0a;
+  letter-spacing: normal;
+}
+
+.tr-detail-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.tr-detail-body {
+  margin-top: 16px;
+  font-size: 14px;
+  line-height: 1.6;
+  color: rgba(10, 10, 10, 0.9);
+}
+
+.tr-detail-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.tr-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 8px;
+  background: #7a5b3e;
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.tr-btn-primary:hover {
+  filter: brightness(1.08);
+}
+
+.tr-btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  background: #fff;
+  color: #0a0a0a;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.tr-btn-outline:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+.tr-divider {
+  border: none;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  margin: 20px 0;
+}
+
+.tr-subhead {
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: #717182;
+}
+
+.tr-mini-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.tr-mini {
+  width: 128px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  text-decoration: none;
+}
+
+.tr-mini:hover {
+  border-color: rgba(0, 0, 0, 0.22);
+}
+
+.tr-mini .tr-cat-chip {
+  align-self: center;
+}
+
+.tr-mini-swatch {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.tr-mini-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #0a0a0a;
+}
+
+.tr-prevnext {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.tr-nav-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.tr-nav-card:hover {
+  border-color: rgba(0, 0, 0, 0.22);
+}
+
+.tr-nav-card.next {
+  justify-content: flex-end;
+  text-align: right;
+}
+
+.tr-nav-card.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.tr-nav-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.tr-nav-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #717182;
+}
+
+.tr-nav-value {
+  font-size: 13px;
+  font-weight: 500;
+  color: #0a0a0a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- 제품 상세 ---- */
+.tr-pd-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 14px;
+}
+
+.tr-pd-swatch {
+  flex-shrink: 0;
+  width: 96px;
+  height: 96px;
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.tr-pd-name {
+  margin: 4px 0;
+  font-family: inherit;
+  font-size: 26px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: #0a0a0a;
+  letter-spacing: normal;
+}
+
+.tr-pd-stat {
+  font-size: 12px;
+  color: #717182;
+}
+
+.tr-feedback-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.tr-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.tr-panel.ai {
+  background: #f6f1ea;
+  border: 1px solid #e6d8c4;
+}
+
+.tr-panel.pos {
+  border: 1px solid #00d492;
+}
+
+.tr-panel.neg {
+  border: 1px solid #ff637e;
+}
+
+.tr-panel-title {
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.tr-panel.pos .tr-panel-title {
+  color: #007a55;
+}
+
+.tr-panel.neg .tr-panel-title {
+  color: #c70036;
+}
+
+.tr-panel.ai p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.62;
+  color: rgba(10, 10, 10, 0.9);
+}
+
+.tr-fb-item {
+  font-size: 13px;
+  line-height: 1.6;
+  color: rgba(10, 10, 10, 0.9);
+}
+
+.tr-fb-chip {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.tr-fb-chip.pos {
+  background: #d0fae5;
+  color: #007a55;
+}
+
+.tr-fb-chip.neg {
+  background: #ffe4e6;
+  color: #c70036;
+}
+
+.tr-bottom-grid {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+.tr-comp-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+}
+
+.tr-comp-row + .tr-comp-row {
+  border-top: 0.8px solid rgba(0, 0, 0, 0.1);
+}
+
+.tr-comp-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: #0a0a0a;
+}
+
+.tr-comp-brand {
+  font-size: 12px;
+  color: #717182;
+}
+
+.tr-type-chip {
+  padding: 3px 7px;
+  border-radius: 4px;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.tr-type-chip.compare {
+  background: #f0f9ff;
+  border: 1px solid #b8e6fe;
+  color: #0069a8;
+}
+
+.tr-type-chip.combo {
+  background: #f5f3ff;
+  border: 1px solid #ddd6ff;
+  color: #7008e7;
+}
+
+/* ---- 반응형 ---- */
+@media (max-width: 1024px) {
+  .tr-main-grid,
+  .tr-bottom-grid,
+  .tr-feedback-grid,
+  .tr-prevnext {
+    grid-template-columns: 1fr;
+  }
+  .tr-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .tr-grid {
+    grid-template-columns: 1fr;
+  }
+}
