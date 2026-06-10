@@ -75,16 +75,23 @@ export default function SalesMemoBoard() {
       .finally(() => setMemoLoading(false))
   }
 
-  // AI 브리핑은 최초 1회 로드(생성에 수 초 소요 → 비동기)
+  // AI 브리핑은 선택된 부서에 맞춰 로드. 필터가 바뀌면 해당 부서 브리핑으로 갱신.
   useEffect(() => {
     if (!token) {
       navigate('/login')
       return
     }
-    getSalesMemoBriefing(token)
-      .then((b) => setBriefing(b.briefing))
-      .catch(() => setBriefingErr('AI 브리핑을 불러오지 못했습니다.'))
-  }, [token, navigate])
+    let active = true
+    const dept = filter === MINE ? undefined : filter
+    setBriefing('')
+    setBriefingErr('')
+    getSalesMemoBriefing(token, dept)
+      .then((b) => active && setBriefing(b.briefing))
+      .catch(() => active && setBriefingErr('AI 브리핑을 불러오지 못했습니다.'))
+    return () => {
+      active = false
+    }
+  }, [token, navigate, filter])
 
   // 필터가 바뀔 때마다 보드 재조회 (부서 목록·본인 부서도 응답에서 받음)
   useEffect(() => {

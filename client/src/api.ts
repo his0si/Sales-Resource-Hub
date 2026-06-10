@@ -242,9 +242,13 @@ export function getSalesMemoBoard(
   });
 }
 
-// AI 위클리 브리핑 (로컬 LLM 생성)
-export function getSalesMemoBriefing(token: string): Promise<{ briefing: string; cached: boolean }> {
-  return request("/api/sales-memo/briefing", {
+// AI 위클리 브리핑 (백그라운드 사전생성분을 읽기만 함). dept 미지정 시 본인 부서.
+export function getSalesMemoBriefing(
+  token: string,
+  dept?: string,
+): Promise<{ briefing: string; generated_at: string | null; pending: boolean }> {
+  const qs = dept ? `?dept=${encodeURIComponent(dept)}` : "";
+  return request(`/api/sales-memo/briefing${qs}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }

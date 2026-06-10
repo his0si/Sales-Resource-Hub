@@ -44,8 +44,13 @@
   top: 40px;
   left: 40px;
   width: 136px;
+  /* Lock to the asset's true ratio (135.817 x 53.1424) — the SVG is preserveAspectRatio="none",
+     so without a fixed ratio the browser stretches it vertically and the logo looks elongated */
+  aspect-ratio: 135.817 / 53.1424;
   height: auto;
   z-index: 1;
+  /* The SVG asset is stored vertically flipped (matches Figma g14), so mirror it back upright */
+  transform: scaleY(-1);
 }
 
 .auth-tagline {

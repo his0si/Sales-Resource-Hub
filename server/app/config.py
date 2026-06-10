@@ -53,6 +53,13 @@ class Settings(BaseSettings):
     ai_summary_enabled: bool = True
     ai_summary_interval: int = 2  # 한 건 생성 후 대기(초). GPU 과점유 방지
 
+    # === AI 위클리 브리핑 (부서별, 백그라운드 사전생성) ===
+    #  요청 시점에 LLM 을 호출하지 않고, briefing_backfill 이 미리 만들어 ai_briefing 에 저장.
+    briefing_enabled: bool = True
+    briefing_interval: int = 2          # 부서 한 건 생성 후 대기(초). GPU 과점유 방지
+    briefing_ttl_seconds: int = 21600   # 새 메모가 없어도 이 주기(기본 6h)마다 재생성
+    briefing_memo_limit: int = 40       # 브리핑 생성에 참고할 최근 메모 수
+
     # === 부서/팀 ===
     #  회원가입 팀 선택지이자 세일즈 메모 '부서' 필터의 단일 출처 (실제 조직표).
     departments: str = (

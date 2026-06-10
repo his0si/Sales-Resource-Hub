@@ -37,14 +37,6 @@
   color: #717182;
 }
 
-.sm-card.open .sm-row-actions svg:last-child {
-  transform: rotate(180deg);
-}
-
-.sm-row-actions svg:last-child {
-  transition: transform 0.15s;
-}
-
 /* ---- 카드 펼침 AI 개요 ---- */
 .sm-summary {
   margin-top: 14px;

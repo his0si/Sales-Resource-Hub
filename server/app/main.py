@@ -4,7 +4,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app import db, sales_memo_sync, summary_backfill
+from app import briefing_backfill, db, sales_memo_sync, summary_backfill
 from app.routers import auth, categories, database, gmail, health, sales_memo
 
 
@@ -15,10 +15,12 @@ async def lifespan(app: FastAPI):
     sync_task = asyncio.create_task(sales_memo_sync.run_forever())
     # 적재된 메모의 3줄 AI 요약을 미리 생성해두는 백그라운드 작업
     summary_task = asyncio.create_task(summary_backfill.run_forever())
+    # 부서별 AI 위클리 브리핑을 미리 생성해두는 백그라운드 작업
+    briefing_task = asyncio.create_task(briefing_backfill.run_forever())
     try:
         yield
     finally:
-        for task in (sync_task, summary_task):
+        for task in (sync_task, summary_task, briefing_task):
             task.cancel()
             try:
                 await task

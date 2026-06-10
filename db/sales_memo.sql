@@ -26,8 +26,14 @@ CREATE TABLE IF NOT EXISTS sales_memo (
     activity_plan       TEXT,                                -- 활동계획 (PLAN)
     gmail_id            VARCHAR(40),                         -- 유입 메일 Gmail 메시지 id (메일유입분만, dedup 키)
     ai_summary          TEXT,                                -- 로컬 LLM 3줄 요약(줄바꿈 구분). 폴러가 미리 생성
+    ai_title            TEXT,                                -- 로컬 LLM 카드 제목('거래선, 핵심'). 백필이 미리 생성
+    ai_tags             TEXT,                                -- 로컬 LLM 해시태그(쉼표 구분, 이슈/상태 중심). 백필이 미리 생성
     created_at          TIMESTAMP    DEFAULT NOW()           -- 레코드 적재일
 );
+
+-- 기존 테이블에 AI 컬럼을 나중에 추가하는 경우용(멱등)
+ALTER TABLE sales_memo ADD COLUMN IF NOT EXISTS ai_title TEXT;
+ALTER TABLE sales_memo ADD COLUMN IF NOT EXISTS ai_tags  TEXT;
 
 -- 메일 유입분 중복 방지용 부분 유니크 인덱스 (xlsx 적재분은 gmail_id 가 NULL 이라 영향 없음)
 CREATE UNIQUE INDEX IF NOT EXISTS uq_sales_memo_gmail_id

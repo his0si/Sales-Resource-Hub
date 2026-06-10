@@ -5,7 +5,6 @@ Gmail 로 들어온 [HSP SalesMemo] 메일은 폴러(sales_memo_sync)가 DB 에 
 로그인한 앱 사용자(Bearer)만 접근 가능.
 """
 
-import time
 from datetime import date, datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -22,7 +21,7 @@ _FIELDS = """
     author_name, author_emp_no,
     planned_visit_date, visit_date, written_at,
     activity_plan, strategy, operation, product, personal, takeaway, followup_plan,
-    gmail_id, ai_summary
+    gmail_id, ai_summary, ai_title, ai_tags
 """
 
 
@@ -81,12 +80,16 @@ def _board_item(
     # 메모의 부서/부문 = 작성자(사번 우선, 성명 폴백)를 조직표와 대조해 판별
     dept, division = directory.lookup(memo.get("author_emp_no"), memo.get("author_name"))
     prod_cat = categories.classify(memo)  # 해시태그(제품군)용 분류
+    # 제목: 미리 생성된 AI 제목 우선, 없으면 '거래선, 활동계획 첫 줄'로 폴백.
+    # 어느 경우든 원문 불릿(○ 등)·이모지를 제거한다.
     customer = (memo.get("customer_name") or "").strip()
-    head = _first_line(memo.get("activity_plan"))
-    if customer and head:
-        title = f"{customer}, {head}"
-    else:
-        title = customer or head or "(제목 없음)"
+    title = sales_memo_ai.clean_title(memo.get("ai_title"))
+    if not title:
+        head = sales_memo_ai.clean_title(_first_line(memo.get("activity_plan")))
+        if customer and head:
+            title = f"{customer}, {head}"
+        else:
+            title = customer or head or "(제목 없음)"
 
     written = memo.get("written_at")
     visited = memo.get("visit_date")
@@ -102,7 +105,9 @@ def _board_item(
         "unread": bool(recent_after and when_date and when_date >= recent_after),
         "author": author,
         "date": _fmt_md(when),
-        "tags": categories.extract_tags(memo, prod_cat),
+        # 해시태그: 미리 생성된 AI 태그(이슈/상태 중심) 우선, 없으면 규칙기반 폴백
+        "tags": sales_memo_ai.split_tags(memo.get("ai_tags"))
+        or categories.extract_tags(memo, prod_cat),
         "summary": sales_memo_ai.split_summary(memo.get("ai_summary")),
         "gmail_id": memo.get("gmail_id"),
     }
@@ -153,62 +158,34 @@ async def sales_memo_board(
     }
 
 
-# ---- AI 위클리 브리핑 (로컬 LLM) ----
-_briefing_cache: dict = {"key": None, "text": None, "at": 0.0}
-_BRIEFING_TTL = 1800  # 30분 캐시
-
-
-def _briefing_prompt(my_dept: str, memos: list[dict]) -> str:
-    lines = []
-    for m in memos:
-        cust = (m.get("customer_name") or "").strip()
-        plan = _first_line(m.get("activity_plan"))
-        take = _first_line(m.get("takeaway"))
-        piece = " / ".join(p for p in [cust, plan, take] if p)
-        if piece:
-            lines.append(f"- {piece}")
-    memo_block = "\n".join(lines[:40]) or "- (최근 메모 없음)"
-    return (
-        "당신은 한솔홈데코 영업 지원 어시스턴트입니다. 아래는 최근 영업 메모 목록입니다.\n"
-        f"'{my_dept}' 부서 관점에서, 자주 등장한 제품·지역·이슈와 주목할 거래선 동향을 "
-        "한국어 3~4문장으로 요약해 주세요. 목록에 없는 내용은 지어내지 말고, "
-        "존댓말 평서문으로 작성하세요. 머리말이나 목록 없이 본문만 출력하세요.\n\n"
-        f"[최근 영업 메모]\n{memo_block}\n\n[주간 브리핑]\n"
-    )
-
-
+# ---- AI 위클리 브리핑 ----
+#  생성은 briefing_backfill 백그라운드 작업이 미리 해 ai_briefing 에 저장한다.
+#  이 핸들러는 LLM 을 호출하지 않고 저장된 값을 즉시 읽기만 한다(요청 블로킹 없음).
 @router.get("/sales-memo/briefing")
-async def sales_memo_briefing(_user: dict = Depends(get_current_user)):
-    """최근 메모를 로컬 LLM(Ollama)으로 요약한 AI 위클리 브리핑."""
-    my_dept = _user.get("department") or settings.my_department
-    now = time.time()
-    if (
-        _briefing_cache["key"] == my_dept
-        and _briefing_cache["text"]
-        and now - _briefing_cache["at"] < _BRIEFING_TTL
-    ):
-        return {"briefing": _briefing_cache["text"], "cached": True}
+async def sales_memo_briefing(
+    dept: str | None = Query(None, description="조회할 부서(미지정 시 본인 부서)"),
+    _user: dict = Depends(get_current_user),
+):
+    """미리 생성된 부서별 AI 위클리 브리핑을 ai_briefing 에서 읽어 반환.
 
+    화면 필터에서 고른 부서(dept)의 브리핑을 보여준다. dept 가 없거나 부서 목록에
+    없는 값이면 본인 부서(없으면 기본 부서)로 폴백한다.
+    """
+    target_dept = dept if dept in settings.department_list else None
+    target_dept = target_dept or _user.get("department") or settings.my_department
     pool = db.get_pool()
-    rows = await pool.fetch(
-        f"""
-        SELECT {_FIELDS}
-        FROM sales_memo
-        ORDER BY written_at DESC NULLS LAST, visit_date DESC NULLS LAST, id DESC
-        LIMIT 40
-        """
+    row = await pool.fetchrow(
+        "SELECT briefing, generated_at FROM ai_briefing WHERE department = $1",
+        target_dept,
     )
-    if not rows:
-        raise HTTPException(status_code=404, detail="브리핑할 메모가 없습니다.")
-
-    prompt = _briefing_prompt(my_dept, [dict(r) for r in rows])
-    try:
-        text = await llm.generate(prompt)
-    except llm.LLMError as exc:
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
-
-    _briefing_cache.update(key=my_dept, text=text, at=now)
-    return {"briefing": text, "cached": False}
+    if row is None:
+        # 아직 백그라운드 생성 전 → 프론트는 '요약하는 중' 상태를 표시한다.
+        return {"briefing": "", "generated_at": None, "pending": True}
+    return {
+        "briefing": row["briefing"],
+        "generated_at": row["generated_at"],
+        "pending": False,
+    }
 
 
 # 단건 원문 조회 (보드 카드의 "원문" 모달에서 사용). 정적 경로(board/briefing) 뒤에 선언.
