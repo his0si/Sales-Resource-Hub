@@ -12,10 +12,9 @@ CREATE TABLE IF NOT EXISTS consumer_product (
   context text,
   candidate_products jsonb,
   resolve_reason text,
-  positive boolean NOT NULL DEFAULT false,
-  negative boolean NOT NULL DEFAULT false,
-  neutral boolean NOT NULL DEFAULT false,
-  mixed boolean NOT NULL DEFAULT false,
+  positive text,
+  negative text,
+  neutral text,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
@@ -41,6 +40,40 @@ ALTER TABLE consumer_product
     )
   );
 
+ALTER TABLE consumer_product
+  ADD COLUMN IF NOT EXISTS positive text,
+  ADD COLUMN IF NOT EXISTS negative text,
+  ADD COLUMN IF NOT EXISTS neutral text;
+
+ALTER TABLE consumer_product
+  DROP COLUMN IF EXISTS mixed;
+
+ALTER TABLE consumer_product
+  ALTER COLUMN positive DROP DEFAULT,
+  ALTER COLUMN negative DROP DEFAULT,
+  ALTER COLUMN neutral DROP DEFAULT;
+
+ALTER TABLE consumer_product
+  ALTER COLUMN positive DROP NOT NULL,
+  ALTER COLUMN negative DROP NOT NULL,
+  ALTER COLUMN neutral DROP NOT NULL;
+
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_name = 'consumer_product'
+      AND column_name = 'positive'
+      AND data_type = 'boolean'
+  ) THEN
+    ALTER TABLE consumer_product
+      ALTER COLUMN positive TYPE text USING CASE WHEN positive THEN 'positive' ELSE NULL END,
+      ALTER COLUMN negative TYPE text USING CASE WHEN negative THEN 'negative' ELSE NULL END,
+      ALTER COLUMN neutral TYPE text USING CASE WHEN neutral THEN 'neutral' ELSE NULL END;
+  END IF;
+END $$;
+
 CREATE UNIQUE INDEX IF NOT EXISTS uq_consumer_product_resolved
   ON consumer_product(content_id, product_id)
   WHERE resolve_status = 'resolved';
@@ -55,6 +88,4 @@ CREATE INDEX IF NOT EXISTS idx_consumer_product_content_id
 CREATE INDEX IF NOT EXISTS idx_consumer_product_product_id
   ON consumer_product(product_id)
   WHERE resolve_status = 'resolved';
-
-
 
