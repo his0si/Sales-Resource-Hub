@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { changePassword, getAuthConfig, updateProfile, type Me } from '../api'
+import { changePassword, getAuthConfig, updateProfile, type Me } from '../lib/api'
 import { CloseIcon } from './icons'
 
 type Msg = { type: 'ok' | 'err'; text: string } | null

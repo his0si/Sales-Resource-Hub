@@ -49,6 +49,13 @@ class Settings(BaseSettings):
     #  컨테이너에서는 OLLAMA_URL=http://host.docker.internal:11434 로 호스트 ollama 사용.
     ollama_url: str = "http://127.0.0.1:11434"
     ollama_model: str = "qwen2.5:14b"
+
+    # === Gemini — 뉴스 AI 위클리 브리핑 전용 ===
+    #  세일즈 메모 요약/부서 브리핑은 계속 Ollama 를 쓰고, 뉴스 브리핑만 Gemini 로 생성한다.
+    #  (원래 halyn weekly_report 가 Gemini 였던 것을 되돌림)
+    gemini_api_key: str | None = None
+    gemini_model: str = "gemini-2.5-flash-lite"
+
     # 메일 적재 시 3줄 AI 요약을 백그라운드로 미리 생성해 sales_memo.ai_summary 에 저장.
     ai_summary_enabled: bool = True
     ai_summary_interval: int = 2  # 한 건 생성 후 대기(초). GPU 과점유 방지

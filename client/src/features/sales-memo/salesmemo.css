@@ -1,0 +1,691 @@
+/* ===== 세일즈 메모(보드) — Figma "세일즈 메모 메인 v0.1" 기준 =====
+   필터바는 trends.css(.tr-filterbar)를 재사용하고, 칩/카드/페이지네이션을 여기서 정의한다.
+   토큰: AI 강조 #5769f3, 본문 회색 #7d7d8a, 제목 #0a0a0a, 본문 텍스트 #393b54 */
+
+.sm-update {
+  color: #393b54;
+  font-weight: 500;
+}
+
+/* ===== 2단 레이아웃 (좌: 브리핑 / 우: 메모) — 좌 486px, gap 24, 우 flex ===== */
+.sm-toprow {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.sm-columns {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  margin-top: 24px;
+}
+
+.sm-col-left {
+  flex-shrink: 0;
+}
+
+.sm-col-left.open {
+  width: 486px;
+}
+
+.sm-col-right {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.sm-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 42px;
+}
+
+.sm-filters {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ---- AI 위클리 브리핑 버튼 ---- */
+.sm-ai-pill {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  gap: 8px;
+  padding: 9px 13px;
+  border: 1px solid rgba(78, 95, 225, 0.5);
+  border-radius: 8px;
+  background: #f7f8ff;
+  color: #5769f3;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.sm-ai-pill.active {
+  background: #eef0ff;
+  border-color: #5769f3;
+}
+
+/* ---- 팀·거래처 필터칩 (알약형) ---- */
+.sm-chip-pill {
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  white-space: nowrap;
+  gap: 6px;
+  padding: 9px 13px 9px 16px;
+  border: 1px solid #393b54;
+  border-radius: 200px;
+  background: #fff;
+  color: #393b54;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.sm-chip-pill:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.sm-count {
+  font-size: 12px;
+  color: #80829a;
+  white-space: nowrap;
+}
+
+/* ---- 브리핑 패널 (좌측) — 시장/경쟁사/소비자 3갈래 (news_briefing) ---- */
+.sm-brief-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 16px 18px;
+  background: #f7f8ff;
+  border: 1px solid rgba(78, 95, 225, 0.5);
+  border-radius: 8px;
+}
+
+.sm-brief-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sm-brief-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 22px;
+  color: #393b54;
+}
+
+.sm-brief-lines {
+  margin: 0;
+  padding-left: 15px;
+  list-style: none;
+}
+
+.sm-brief-lines li {
+  position: relative;
+  font-size: 13px;
+  line-height: 22px;
+  color: #393b54;
+}
+
+.sm-brief-lines li::before {
+  content: '-';
+  position: absolute;
+  left: -13px;
+  color: #393b54;
+}
+
+.sm-brief-empty {
+  margin: 0;
+  font-size: 13px;
+  color: #7d7d8a;
+}
+
+.sm-list {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* 좁은 화면에선 세로로 쌓기 — 브리핑 패널과 카드 컬럼을 같은 폭(100%)으로 맞춘다 */
+@media (max-width: 1100px) {
+  .sm-toprow,
+  .sm-columns {
+    flex-direction: column;
+  }
+  .sm-columns {
+    align-items: stretch;
+  }
+  .sm-col-left,
+  .sm-col-left.open,
+  .sm-col-right {
+    width: 100%;
+  }
+}
+
+.sm-card {
+  display: flex;
+  flex-direction: column;
+  padding: 17px 21px;
+  background: #fff;
+  border: 1px solid rgba(125, 125, 138, 0.3);
+  border-radius: 10px;
+}
+
+.sm-card:hover {
+  border-color: rgba(125, 125, 138, 0.5);
+}
+
+.sm-card.open {
+  border-color: #5769f3;
+}
+
+.sm-card-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.sm-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.sm-title {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 28px;
+  letter-spacing: -0.096px;
+  color: #0a0a0a;
+}
+
+.sm-title-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.sm-date {
+  font-size: 12px;
+  line-height: 16px;
+  color: #7d7d8a;
+}
+
+.sm-caret {
+  display: inline-flex;
+  color: #7d7d8a;
+  transition: transform 0.15s ease;
+}
+
+.sm-caret.open {
+  transform: rotate(180deg);
+}
+
+.sm-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  line-height: 24px;
+  color: #7d7d8a;
+}
+
+.sm-meta .sm-sep {
+  color: rgba(125, 125, 138, 0.5);
+}
+
+.sm-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.sm-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.sm-hashtag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: #f7f8ff;
+  color: #5769f3;
+  font-size: 14px;
+  line-height: 24px;
+}
+
+.sm-link {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 12px;
+  border: 1px solid rgba(125, 125, 138, 0.3);
+  border-radius: 8px;
+  background: #fff;
+  color: #0a0a0a;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.sm-link:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+/* ---- 카드 펼침 AI 개요 ---- */
+.sm-summary {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(125, 125, 138, 0.3);
+}
+
+.sm-summary-head {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #5769f3;
+}
+
+.sm-summary-head svg {
+  color: #5769f3;
+}
+
+.sm-summary-list {
+  margin: 0;
+  padding-left: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  list-style: disc;
+}
+
+.sm-summary-list li {
+  font-size: 14px;
+  line-height: 24px;
+  letter-spacing: -0.096px;
+  font-weight: 500;
+  color: #393b54;
+}
+
+.sm-summary-msg {
+  margin: 0;
+  font-size: 14px;
+  color: #7d7d8a;
+}
+
+/* ---- 페이지네이션 ---- */
+.sm-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.sm-page-nums {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.sm-page-num {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(10, 10, 10, 0.7);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.sm-page-num:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.sm-page-num.active {
+  background: #e9ecf3;
+  color: #0a0a0a;
+}
+
+.sm-page-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #0a0a0a;
+  cursor: pointer;
+}
+
+.sm-page-arrow:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.sm-page-arrow:disabled {
+  color: rgba(10, 10, 10, 0.25);
+  cursor: default;
+}
+
+/* ---- 부서 드롭다운 ---- */
+.sm-dept {
+  position: relative;
+}
+
+.sm-dept-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 20;
+  min-width: 220px;
+  padding: 6px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: rgba(0, 0, 0, 0.1) 0 10px 24px -6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sm-dept-item {
+  display: block;
+  width: 100%;
+  padding: 9px 12px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #0a0a0a;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+
+.sm-dept-item:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.sm-dept-item.active {
+  background: #f7f8ff;
+  color: #5769f3;
+}
+
+/* ---- 메일 원문 뷰어(/sales-memo/inbox) ---- */
+.inbox-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.inbox-item {
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.inbox-item.open {
+  border-color: rgba(87, 105, 243, 0.4);
+}
+
+.inbox-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 14px 18px;
+  border: none;
+  background: #fff;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+
+.inbox-row:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.inbox-author {
+  flex-shrink: 0;
+  width: 110px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #0a0a0a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inbox-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.inbox-customer {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #0a0a0a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inbox-preview {
+  display: block;
+  font-size: 12px;
+  color: #717182;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inbox-date {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: #717182;
+  white-space: nowrap;
+}
+
+.inbox-body {
+  padding: 16px 18px;
+  border-top: 1px dashed rgba(0, 0, 0, 0.12);
+  background: #f6f7f9;
+}
+
+/* 영업일지 표 (브라운/뉴트럴 토큰) */
+.memo-table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 13px;
+}
+
+.memo-table td {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 9px 12px;
+  vertical-align: top;
+  text-align: left;
+  word-break: break-word;
+  white-space: pre-wrap;
+  color: #0a0a0a;
+}
+
+.memo-table td.memo-label {
+  background: #f5f5f9;
+  color: #393b54;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+  width: 1%;
+}
+
+.inbox-empty {
+  padding: 40px;
+  text-align: center;
+  color: #717182;
+}
+
+/* ---- 원문 모달 ---- */
+.sm-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 48px 20px;
+  background: rgba(0, 0, 0, 0.4);
+  overflow-y: auto;
+}
+
+.sm-modal {
+  width: 100%;
+  max-width: 860px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: rgba(0, 0, 0, 0.25) 0 20px 50px -12px;
+  overflow: hidden;
+}
+
+.sm-modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.sm-modal-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: #0a0a0a;
+}
+
+.sm-modal-sub {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #717182;
+}
+
+.sm-modal-close {
+  flex-shrink: 0;
+  display: inline-flex;
+  padding: 6px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #717182;
+  cursor: pointer;
+}
+
+.sm-modal-close:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #0a0a0a;
+}
+
+.sm-modal-body {
+  padding: 20px 24px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+/* ── 페이지네이션 줄바꿈 + 생략부호 ── */
+.sm-page-nums { flex-wrap: wrap; justify-content: center; }
+.sm-page-ellipsis {
+  min-width: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(10, 10, 10, 0.45);
+  font-size: 14px;
+  user-select: none;
+}
+
+/* ── 모바일 (≤640px): 툴바·필터 줄바꿈, 검색 전체폭 ── */
+@media (max-width: 640px) {
+  .sm-toprow { gap: 10px; }
+  .sm-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .sm-filters { width: 100%; gap: 6px; }
+  /* 뉴스 화면 내 검색창은 모바일에선 숨겨 세일즈 메모와 동일한 필터 레이아웃을 만든다 */
+  .sm-filters .tr-filter-search { display: none; }
+  .sm-count { align-self: flex-end; }
+  .sm-pagination { gap: 6px; flex-wrap: wrap; }
+
+  /* 알약 버튼(브리핑 토글·필터칩)을 모바일에서 한 단계 작게 */
+  .sm-ai-pill {
+    font-size: 13px;
+    gap: 6px;
+    padding: 7px 12px;
+    min-height: 40px;
+  }
+  .sm-chip-pill {
+    font-size: 13px;
+    gap: 4px;
+    padding: 7px 11px 7px 14px;
+  }
+
+  /* 원문 모달 표: 좁은 화면에선 라벨/값을 세로로 쌓아 읽기 편하게.
+     (4열 「라벨|값|라벨|값」 구조가 짓눌려 날짜가 글자 단위로 줄바꿈되던 문제 해결) */
+  .memo-table,
+  .memo-table tbody,
+  .memo-table tr,
+  .memo-table td {
+    display: block;
+    width: 100%;
+  }
+  .memo-table tr + tr { margin-top: 8px; }
+  .memo-table td {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: none;
+  }
+  .memo-table tr td:last-child {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  .memo-table td.memo-label {
+    width: 100%;
+    text-align: left;
+    white-space: normal;
+  }
+}

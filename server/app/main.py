@@ -4,8 +4,25 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app import briefing_backfill, db, sales_memo_sync, summary_backfill
-from app.routers import auth, categories, database, gmail, health, sales_memo
+from app import (
+    briefing_backfill,
+    db,
+    news_briefing_backfill,
+    sales_memo_sync,
+    summary_backfill,
+)
+from app.routers import (
+    auth,
+    categories,
+    chat,
+    consumer,
+    database,
+    gmail,
+    health,
+    news,
+    sales_memo,
+    search,
+)
 
 
 @asynccontextmanager
@@ -17,10 +34,12 @@ async def lifespan(app: FastAPI):
     summary_task = asyncio.create_task(summary_backfill.run_forever())
     # 부서별 AI 위클리 브리핑을 미리 생성해두는 백그라운드 작업
     briefing_task = asyncio.create_task(briefing_backfill.run_forever())
+    # 뉴스 기반 AI 위클리 브리핑(시장/경쟁사/소비자) 백그라운드 생성
+    news_briefing_task = asyncio.create_task(news_briefing_backfill.run_forever())
     try:
         yield
     finally:
-        for task in (sync_task, summary_task, briefing_task):
+        for task in (sync_task, summary_task, briefing_task, news_briefing_task):
             task.cancel()
             try:
                 await task
@@ -50,6 +69,10 @@ app.include_router(auth.router)
 app.include_router(gmail.router)
 app.include_router(sales_memo.router)
 app.include_router(categories.router)
+app.include_router(news.router)
+app.include_router(consumer.router)
+app.include_router(chat.router)
+app.include_router(search.router)
 
 
 @app.get("/")

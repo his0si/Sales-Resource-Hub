@@ -1,14 +1,16 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
-import Home from './pages/Home'
-import Login from './pages/Login'
-import News from './pages/News'
-import Register from './pages/Register'
-import SalesMemoBoard from './pages/SalesMemoBoard'
-import PostDetail from './pages/trends/PostDetail'
-import PostList from './pages/trends/PostList'
-import ProductDetail from './pages/trends/ProductDetail'
-import ProductList from './pages/trends/ProductList'
-import TrendsMain from './pages/trends/TrendsMain'
+import ChatPage from './features/chat/ChatPage'
+import Home from './features/home/HomePage'
+import Login from './features/auth/LoginPage'
+import News from './features/news/NewsPage'
+import Register from './features/auth/RegisterPage'
+import SalesMemoBoard from './features/sales-memo/SalesMemoBoardPage'
+import SearchPage from './features/search/SearchPage'
+import PostDetail from './features/trends/PostDetailPage'
+import PostList from './features/trends/PostListPage'
+import ProductDetail from './features/trends/ProductDetailPage'
+import ProductList from './features/trends/ProductListPage'
+import TrendsMain from './features/trends/TrendsMainPage'
 
 function App() {
   // 모든 화면이 라이트 고정 디자인이라 떠있는 테마 토글은 사용하지 않는다.
@@ -23,6 +25,8 @@ function App() {
       <Route path="/trends/products/:id" element={<ProductDetail />} />
       <Route path="/news" element={<News />} />
       <Route path="/sales-memo" element={<SalesMemoBoard />} />
+      <Route path="/search" element={<SearchPage />} />
+      <Route path="/chat" element={<ChatPage />} />
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="*" element={<Navigate to="/" replace />} />

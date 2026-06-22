@@ -1,15 +1,29 @@
 /* ===== 대시보드 앱 셸 + 홈 =====
    Figma "홈" 디자인 토큰을 직접 사용한다 (라이트 고정).
-   accent #7a5b3e · muted #717182 · text #0a0a0a · 카드 보더 rgba(0,0,0,.1) · 라운드 14/10/8/4 */
+   배경 #fff · 사이드바 #f6f7f9 · 선택 #e9ecf3 · accent(navy) #393b54 · AI(indigo) #5769f3
+   · muted #717182 · text #0a0a0a · 카드 보더 rgba(0,0,0,.1) · 라운드 14/10/8/4 */
 
 .app {
   display: flex;
-  min-height: 100svh;
-  background: #fafaf7;
+  /* 앱 전체를 뷰포트 높이에 고정하고 본문(main-col)만 내부 스크롤시킨다.
+     → 사이드바는 어느 페이지에서도 스크롤되지 않고 항상 고정. */
+  height: 100svh;
+  overflow: hidden;
+  background: #ffffff;
   color: #0a0a0a;
   text-align: left;
   font-family: 'Pretendard Variable', Pretendard, system-ui, sans-serif;
   letter-spacing: normal;
+}
+
+/* 오프캔버스 드로어/콘텐츠로 인한 가로 스크롤·잘림 방지 (sticky 헤더 영향 없는 body 레벨) */
+html,
+body {
+  overflow-x: hidden;
+}
+
+.app-main-col {
+  max-width: 100%;
 }
 
 /* ---- 사이드바 ---- */
@@ -21,16 +35,23 @@
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  background: #fafafa;
-  border-right: 0.8px solid rgba(0, 0, 0, 0.1);
+  background: #f6f7f9;
+  border-right: 1px solid rgba(125, 125, 138, 0.3);
 }
 
 .app-brand {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 24px 20px;
-  border-bottom: 0.8px solid rgba(0, 0, 0, 0.1);
+  padding: 22px 20px;
+}
+
+/* Figma 사이드바 로고(Hansol 워드마크) — viewBox 90x26 */
+.app-brand-logo {
+  flex-shrink: 0;
+  width: 64px;
+  height: auto;
+  display: block;
 }
 
 .app-logo {
@@ -38,7 +59,7 @@
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  background: #7a5b3e;
+  background: #393b54;
   color: #fff;
   display: grid;
   place-content: center;
@@ -53,10 +74,13 @@
 }
 
 .app-brand-title {
-  font-size: 15px;
-  font-weight: 500;
-  line-height: 18.75px;
-  color: #0a0a0a;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 18px;
+  color: #5e5f60;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .app-brand-sub {
@@ -90,12 +114,14 @@
   border: none;
   border-radius: 8px;
   background: transparent;
-  color: rgba(10, 10, 10, 0.8);
+  color: #54545d;
   font-family: inherit;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
-  line-height: 21px;
+  line-height: 20px;
+  letter-spacing: -0.096px;
   text-decoration: none;
+  text-align: left;
   cursor: pointer;
 }
 
@@ -108,8 +134,8 @@
 }
 
 .app-nav-item.active {
-  background: rgba(122, 91, 62, 0.1);
-  color: #5a4029;
+  background: #e9ecf3;
+  color: #0a0a0a;
 }
 
 .app-nav-chevron {
@@ -133,12 +159,12 @@
 
 .app-subnav-item {
   display: block;
-  padding: 6px 12px 6px 40px;
+  padding: 6px 12px 6px 38px;
   border-radius: 8px;
-  color: rgba(10, 10, 10, 0.7);
-  font-size: 13px;
+  color: #54545d;
+  font-size: 12.5px;
   font-weight: 500;
-  line-height: 19.5px;
+  line-height: 20px;
   text-decoration: none;
 }
 
@@ -147,8 +173,8 @@
 }
 
 .app-subnav-item.active {
-  background: rgba(122, 91, 62, 0.1);
-  color: #5a4029;
+  background: #e9ecf3;
+  color: #0a0a0a;
 }
 
 .app-user {
@@ -211,9 +237,11 @@
 .app-account-menu {
   position: absolute;
   bottom: calc(100% + 8px);
-  left: 0;
+  right: 0;
+  left: auto;
   z-index: 50;
   min-width: 210px;
+  max-width: calc(100vw - 32px);
   padding: 6px;
   background: #fff;
   border: 1px solid rgba(0, 0, 0, 0.1);
@@ -278,7 +306,7 @@
 .acct-overlay {
   position: fixed;
   inset: 0;
-  z-index: 120;
+  z-index: 300;
   display: flex;
   align-items: flex-start;
   justify-content: center;
@@ -358,7 +386,7 @@
   height: 46px;
   box-sizing: border-box;
   padding: 0 14px;
-  background: #f3f3f5;
+  background: #f5f5f9;
   border: 1px solid transparent;
   border-radius: 10px;
   font-family: inherit;
@@ -372,7 +400,7 @@
 
 .acct-input:focus-visible,
 .acct-select:focus-visible {
-  outline: 2px solid #7a5b3e;
+  outline: 2px solid #393b54;
   outline-offset: 1px;
 }
 
@@ -380,7 +408,7 @@
   appearance: none;
   cursor: pointer;
   padding-right: 40px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23645547' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23393b54' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 12px center;
 }
@@ -458,7 +486,7 @@
 
 .acct-btn-primary {
   border: none;
-  background: #645547;
+  background: #393b54;
   color: #fff;
 }
 
@@ -482,7 +510,12 @@
   padding-right: 0;
 }
 
-.app.collapsed .app-brand-text,
+/* 접힌 레일(64px)에서는 워드마크를 줄여 가운데 배치 */
+.app.collapsed .app-brand-logo {
+  width: 44px;
+}
+
+.app.collapsed .app-brand-title,
 .app.collapsed .app-nav-item > span:not(.app-nav-chevron),
 .app.collapsed .app-nav-chevron,
 .app.collapsed .app-subnav,
@@ -503,10 +536,12 @@
   align-items: center;
 }
 
-/* ---- 우측 컬럼 ---- */
+/* ---- 우측 컬럼 (내부 스크롤 영역) ---- */
 .app-main-col {
   flex: 1;
   min-width: 0;
+  height: 100svh;
+  overflow-y: auto;
   display: flex;
   flex-direction: column;
 }
@@ -533,10 +568,20 @@
   height: 40px;
   box-sizing: border-box;
   padding: 0 13px;
-  background: #f3f3f5;
+  background: #f5f5f9;
   border: 1px solid transparent;
   border-radius: 8px;
   color: #717182;
+}
+
+.app-search-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
 }
 
 .app-search input {
@@ -615,7 +660,7 @@
 .dash-link {
   font-size: 12px;
   font-weight: 500;
-  color: #7a5b3e;
+  color: #717182;
   text-decoration: none;
   white-space: nowrap;
 }
@@ -664,7 +709,7 @@
   text-align: center;
   font-size: 13px;
   font-weight: 500;
-  color: #7a5b3e;
+  color: #393b54;
 }
 
 .dash-rank.muted {
@@ -689,12 +734,13 @@
   font-weight: 500;
 }
 
+/* 국문 관례(피그마 기준): 상승=빨강, 하락=파랑 */
 .dash-trend.up {
-  color: #009966;
+  color: #ec003f;
 }
 
 .dash-trend.down {
-  color: #ec003f;
+  color: #2b7fff;
 }
 
 .dash-trend.flat {
@@ -706,8 +752,8 @@
   flex-direction: column;
   gap: 8px;
   padding: 16px;
-  background: #f6f1ea;
-  border: 1px solid #e6d8c4;
+  background: #f7f8ff;
+  border: 1px solid rgba(78, 95, 225, 0.3);
   border-radius: 10px;
 }
 
@@ -715,7 +761,7 @@
   font-size: 11px;
   line-height: 16.5px;
   letter-spacing: 0.275px;
-  color: #7a5b3e;
+  color: #5769f3;
 }
 
 .dash-ai p {
@@ -814,8 +860,8 @@
 .dash-hashtag {
   padding: 2px 6px;
   border-radius: 4px;
-  background: #f5f5f5;
-  color: #404040;
+  background: #f7f8ff;
+  color: #5769f3;
   font-size: 10.5px;
   line-height: 1.5;
 }
@@ -873,6 +919,20 @@
   border-top: 0.8px solid rgba(0, 0, 0, 0.1);
 }
 
+/* 카드 없이 쓰는 로딩/에러/안내 한 줄 메시지 (.state-note) */
+.state-note {
+  padding: 24px 4px;
+  font-size: 13px;
+}
+
+.state-note.muted {
+  color: #717182;
+}
+
+.state-note.error {
+  color: #c0392b;
+}
+
 /* ---- 반응형 ---- */
 @media (max-width: 1024px) {
   .dash-trends-grid,
@@ -881,30 +941,140 @@
   }
 }
 
+/* 모바일 전용 컨트롤은 데스크탑에서 숨김 */
+.app-burger,
+.app-mobile-brand,
+.app-backdrop {
+  display: none;
+}
+
 @media (max-width: 720px) {
+  /* 사이드바 → 오프캔버스 드로어 */
   .app-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100svh;
+    width: 272px;
+    z-index: 200;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    box-shadow: 2px 0 16px rgba(0, 0, 0, 0.12);
+  }
+  .app.mobile-open .app-sidebar {
+    transform: translateX(0);
+  }
+  /* 모바일에서는 데스크탑 '접기(rail)'를 무시하고 항상 전체 메뉴 노출 */
+  .app.collapsed .app-sidebar { width: 272px; }
+  .app.collapsed .app-brand { justify-content: flex-start; padding: 24px 20px; }
+  .app.collapsed .app-brand-title { display: inline; }
+  .app.collapsed .app-brand-logo { width: 64px; }
+  .app.collapsed .app-subnav { display: flex; }
+  .app.collapsed .app-user-info { display: flex; }
+  .app.collapsed .app-nav-item { justify-content: flex-start; }
+  .app.collapsed .app-nav-item > span:not(.app-nav-chevron) { display: block; }
+  .app.collapsed .app-nav-chevron { display: inline-flex; }
+  .app.collapsed .app-user { justify-content: flex-start; }
+  .app.collapsed .app-user-actions { flex-direction: row; align-items: center; }
+
+  /* 드로어 backdrop */
+  .app-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 150;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .app.mobile-open .app-backdrop {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* 모바일 톱바: 햄버거 + 브랜드 (검색·업데이트 숨김) */
+  .app-burger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    padding: 6px;
+    background: none;
+    border: none;
+    color: #0a0a0a;
+    cursor: pointer;
+  }
+  .app-mobile-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+  /* 상단바 브랜드: Hansol 워드마크(사이드바와 동일 자산) */
+  .app-mobile-brand-logo {
+    flex-shrink: 0;
     width: 64px;
+    height: auto;
+    display: block;
   }
-  .app-brand-text,
-  .app-brand-sub,
-  .app-nav-item > span:not(.app-nav-chevron),
-  .app-nav-chevron,
-  .app-subnav,
-  .app-user-info {
-    display: none;
+  .app-mobile-brand-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #5e5f60;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
-  .app-nav-item {
-    justify-content: center;
-  }
-  .app-user {
-    justify-content: center;
-  }
-  .app-topbar,
-  .app-main {
-    padding-left: 16px;
-    padding-right: 16px;
-  }
-  .app-updated {
-    display: none;
-  }
+  .app-search { display: none; }
+  .app-updated { display: none; }
+  .app-topbar { gap: 12px; padding: 12px 16px; }
+  .app-main { padding: 16px; gap: 16px; }
+
+  /* 모바일에서 페이지 제목/카드 헤더를 한 단계 줄여 공간 확보 */
+  .dash-greeting h1 { font-size: 20px; line-height: 30px; }
+  .dash-greeting p { font-size: 12px; }
+  .dash-card-head { padding: 12px 16px; }
+  .dash-trends-grid { padding: 0 16px 16px; }
+  .dash-news-row,
+  .dash-memo-row { padding: 12px 16px; }
+
+  /* 카드 헤더: 제목 + '전체 보기' 링크가 좁은 화면에서 줄바꿈되도록 */
+  .dash-card-head { flex-wrap: wrap; row-gap: 4px; }
+
+  /* 뉴스 메타(태그·유형·날짜)가 가로로 넘치지 않도록 줄바꿈 */
+  .dash-news-meta { flex-wrap: wrap; row-gap: 4px; }
+  .dash-date { margin-left: auto; }
+
+  /* 뉴스 제목 + 원문 링크: 긴 제목이 줄바꿈되도록(아이콘은 상단 정렬) */
+  .dash-news-title { align-items: flex-start; }
+  .dash-news-title span { min-width: 0; word-break: break-word; }
+
+  /* 소비자 동향 Top5 한 줄: 길면 제품명만 줄어들고 추세 배지는 유지 */
+  .dash-top5-row { flex-wrap: wrap; row-gap: 4px; }
+
+  /* AI 브리핑/메모 본문의 긴 텍스트·URL이 카드 밖으로 넘치지 않도록 */
+  .dash-ai p,
+  .dash-memo-title { overflow-wrap: anywhere; }
+}
+
+/* 초소형(≤480px): 인사말·여백을 한 단계 더 줄여 320px까지 가로 넘침 방지 */
+@media (max-width: 480px) {
+  .app-main { padding: 12px; gap: 12px; }
+  .app-topbar { padding: 10px 12px; }
+  .dash-greeting h1 { font-size: 18px; line-height: 26px; }
+  .dash-card-head { padding: 10px 12px; }
+  .dash-card-head h2 { font-size: 14px; }
+  .dash-trends-grid { padding: 0 12px 12px; gap: 16px; }
+  .dash-news-row,
+  .dash-memo-row { padding: 10px 12px; }
+  .dash-top5-row { padding: 8px 10px; }
+  /* 상단바 모바일 브랜드 워드마크/타이틀 축소 */
+  .app-mobile-brand-logo { width: 56px; }
+  .app-mobile-brand-title { font-size: 12.5px; }
+}
+
+/* 모바일 드로어에서는 데스크탑용 '접기' 버튼 숨김 */
+@media (max-width: 720px) {
+  .app-collapse-btn { display: none; }
 }

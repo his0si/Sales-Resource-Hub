@@ -1,0 +1,92 @@
+/* ===== 통합 검색 결과 ===== */
+.search-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.search-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border-top: 0.8px solid rgba(0, 0, 0, 0.1);
+  text-decoration: none;
+  color: inherit;
+}
+
+.search-row:first-of-type {
+  border-top: none;
+}
+
+.search-row:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.search-thumb {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background-size: cover;
+  background-position: center;
+}
+
+.search-row-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.search-row-title {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  color: #0a0a0a;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.search-row-sub {
+  font-size: 12px;
+  color: #717182;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.search-row-date {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: #717182;
+}
+
+@media (max-width: 640px) {
+  /* 행을 줄바꿈 가능하게 하고 날짜는 본문 아래로 흘려보낸다 */
+  .search-row {
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    padding: 12px 16px;
+  }
+
+  /* 좁은 화면에선 제목을 한 줄로 자르지 않고 줄바꿈해서 다 보이게 */
+  .search-row-title {
+    white-space: normal;
+    overflow: visible;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  .search-row-sub {
+    white-space: normal;
+    overflow: visible;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  /* 썸네일은 그대로 두되 너비를 넘지 않게 보장 */
+  .search-thumb { max-width: 100%; }
+}

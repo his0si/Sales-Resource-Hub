@@ -196,3 +196,20 @@ export function SparkleIcon({ size = 16 }: IconProps) {
     </svg>
   )
 }
+
+export function BotIcon({ size = 16 }: IconProps) {
+  return (
+    <svg {...base(size)}>
+      <rect x="4" y="8" width="16" height="11" rx="3" />
+      <path d="M12 8V4M12 4h-2M8 13h.01M16 13h.01M9 16.5h6" />
+    </svg>
+  )
+}
+
+export function SendIcon({ size = 16 }: IconProps) {
+  return (
+    <svg {...base(size)}>
+      <path d="M12 19V5M5 12l7-7 7 7" />
+    </svg>
+  )
+}

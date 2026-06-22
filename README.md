@@ -181,7 +181,7 @@ curl http://127.0.0.1:8100/api/users       # → users 목록(비번 제외)
 - 메일에 없는 `customer_code`/`author_emp_no`는 같은 거래선·작성자의 기존 행에서 **자동 보강**.
 - **중복 방지**: `gmail_id`(부분 UNIQUE 인덱스). 메일 유입 행의 `visit_no`는 `'GM'+gmail_id`. xlsx 초기분은 `gmail_id=NULL`로 공존 → 한 화면에 최신순 표시.
 
-> ⚠️ **Gmail OAuth 주의**: refresh token이 만료/취소되면(`invalid_grant`) 폴러는 계속 돌지만 매 주기 인증에서 실패해 **신규 메일이 안 들어옵니다**. 재발급: `cd server && python3 scripts/gmail_authorize.py` → 출력된 `GMAIL_REFRESH_TOKEN`을 `.env`에 교체 → `restart api`. 토큰이 7일마다 만료되는 걸 막으려면 Google Cloud Console에서 OAuth 동의 화면을 **"프로덕션"** 으로 게시하세요(테스트 모드는 7일 만료).
+> ⚠️ **Gmail OAuth 주의**: refresh token이 만료/취소되면(`invalid_grant`) 폴러는 계속 돌지만 매 주기 인증에서 실패해 **신규 메일이 안 들어옵니다**. 
 > 헬스 체크: `cd server && python3 -c "import httpx;from app.config import settings as s;print(httpx.post('https://oauth2.googleapis.com/token',data={'client_id':s.gmail_client_id,'client_secret':s.gmail_client_secret,'refresh_token':s.gmail_refresh_token,'grant_type':'refresh_token'}).status_code)"` → 200이면 정상.
 
 ### 5.2 부서·부문 판별 (조직 마스터)

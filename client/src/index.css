@@ -1,3 +1,11 @@
+/* 전역 박스 모델 리셋 — width:100% + padding 요소가 컨테이너 밖으로 삐져나오는
+   반응형 오버플로우(챗봇 입력창·AI 브리핑 패널 등)를 한 번에 해소한다. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
 :root {
   --text: #6b6375;
   --text-h: #08060d;
@@ -78,6 +86,11 @@ h1 {
   @media (max-width: 1024px) {
     font-size: 36px;
     margin: 20px 0;
+  }
+  /* 초소형 화면에서 36px도 가로 넘침을 유발할 수 있어 한 단계 더 축소 */
+  @media (max-width: 480px) {
+    font-size: 28px;
+    letter-spacing: -0.84px;
   }
 }
 h2 {

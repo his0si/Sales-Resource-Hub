@@ -99,6 +99,7 @@ def _board_item(
     return {
         "id": memo["id"],
         "title": title,
+        "customer": customer or None,
         "dept": dept,
         "division": division,
         "own": dept is not None and dept == my_dept,
@@ -116,7 +117,7 @@ def _board_item(
 @router.get("/sales-memo/board")
 async def sales_memo_board(
     dept: str | None = Query(None, description="부서(팀) 필터. 미지정=본인 부서 우선, '전체'=전체"),
-    limit: int = Query(100, ge=1, le=500),
+    limit: int = Query(2000, ge=1, le=5000),
     _user: dict = Depends(get_current_user),
 ):
     """세일즈 메모를 보드 카드로 가공해 반환. 본인(로그인 사용자) 부서 우선 정렬."""

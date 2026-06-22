@@ -60,10 +60,26 @@ def _build_prompt(dept: str, memos: list[dict]) -> str:
     return (
         "당신은 한솔홈데코 영업 지원 어시스턴트입니다. 아래는 최근 영업 메모 목록입니다.\n"
         f"'{dept}' 부서 관점에서, 자주 등장한 제품·지역·이슈와 주목할 거래선 동향을 "
-        "한국어 3~4문장으로 요약해 주세요. 목록에 없는 내용은 지어내지 말고, "
-        "존댓말 평서문으로 작성하세요. 머리말이나 목록 없이 본문만 출력하세요.\n\n"
+        "한국어 불릿 3개로 요약해 주세요.\n"
+        "규칙:\n"
+        "- 각 줄은 '- '로 시작한다.\n"
+        "- 보고서 개조식으로 작성하고, 문장은 반드시 '~함/~됨/~임/~음' 같은 명사형 종결로 끝낸다 "
+        "(예: '협의가 이루어짐', '동향이 파악됨', '관심이 높음').\n"
+        "- 마침표(.)를 찍지 않는다.\n"
+        "- 목록에 없는 내용은 지어내지 않는다.\n"
+        "- 머리말·제목 없이 불릿 3줄만 출력한다.\n\n"
         f"[최근 영업 메모]\n{memo_block}\n\n[주간 브리핑]\n"
     )
+
+
+def _normalize_bullets(text: str) -> str:
+    """LLM 출력 → '한 줄에 하나'의 정돈된 개조식 불릿(머리표·끝 마침표 제거, 최대 3줄)."""
+    lines = []
+    for raw in text.splitlines():
+        line = raw.strip().lstrip("-•*").strip().rstrip(" .")
+        if line:
+            lines.append(line)
+    return "\n".join(lines[:3])
 
 
 async def _pick_stale_dept(pool) -> tuple[str, int, int] | None:
@@ -99,7 +115,7 @@ async def _generate_one(pool) -> bool:
     rows = await pool.fetch(_PICK, settings.briefing_memo_limit)
     prompt = _build_prompt(dept, [dict(r) for r in rows])
     try:
-        text = await llm.generate(prompt)
+        text = _normalize_bullets(await llm.generate(prompt))
     except llm.LLMError:
         # ollama 미가동 등 → 조용히 실패(상위 루프가 길게 대기 후 재시도)
         return False

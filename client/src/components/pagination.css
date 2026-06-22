@@ -1,0 +1,86 @@
+/* 공용 페이지네이션 (세일즈 메모/뉴스/소비자 동향 공통) */
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 24px;
+}
+.pager-nums {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2px;
+}
+.pager-num {
+  min-width: 32px;
+  height: 32px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: rgba(10, 10, 10, 0.7);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.pager-num:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+.pager-num.active {
+  background: #e9ecf3;
+  color: #0a0a0a;
+}
+.pager-ellipsis {
+  min-width: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(10, 10, 10, 0.45);
+  font-size: 14px;
+  user-select: none;
+}
+.pager-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: #0a0a0a;
+  cursor: pointer;
+}
+.pager-arrow:hover:not(:disabled) {
+  background: rgba(0, 0, 0, 0.04);
+}
+.pager-arrow:disabled {
+  color: rgba(10, 10, 10, 0.25);
+  cursor: default;
+}
+
+/* 모바일: 버튼·간격을 줄여 좁은 화면에서도 한 줄(또는 줄바꿈)로 들어가게 */
+@media (max-width: 480px) {
+  .pager {
+    gap: 4px;
+    margin-top: 16px;
+  }
+  .pager-num {
+    min-width: 28px;
+    height: 28px;
+    padding: 0 6px;
+    font-size: 13px;
+  }
+  .pager-arrow {
+    width: 28px;
+    height: 28px;
+  }
+  .pager-ellipsis {
+    min-width: 16px;
+    font-size: 13px;
+  }
+}
